@@ -2,7 +2,7 @@ package com.kiselev.financialcompanion.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val primaryColor = Color(0xFF190482)
+val primaryColor = Color(0xFF2A64D9)
 val secondaryColor = Color(0xFF7752FE)
 val accentColor = Color(0xFF8E8FFA)
 val additionalColor = Color(0xFFC2D9FF)
