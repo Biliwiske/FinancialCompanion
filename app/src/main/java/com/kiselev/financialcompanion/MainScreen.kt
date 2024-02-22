@@ -1,7 +1,8 @@
 package com.kiselev.financialcompanion
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,20 +19,21 @@ import androidx.compose.ui.graphics.Color.Companion.Red
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(mainController: NavHostController) {
     val navController = rememberNavController()
      Scaffold (
-         bottomBar = {
-             BottomNavigation(navController = navController)
+         bottomBar = { BottomNavigation(navController = navController) }
+     ){ innerPadding ->
+         Box(modifier = Modifier.padding(innerPadding)) {
+             BottomNavGraph(navController = navController, mainController = mainController)
          }
-     ){
-         BottomNavGraph(navController = navController)
      }
 }
 
@@ -50,7 +52,10 @@ fun BottomNavigation(navController: NavController){
         listItems.forEach { item->
             NavigationBarItem(
                 selected = currentRoute == item.route,
-                onClick = { navController.navigate(route = item.route) },
+                onClick = {
+                    navController.navigate(route = item.route)
+                { launchSingleTop = true }
+                   },
                 icon = { Icon(painter = painterResource(id = item.icon), contentDescription = "BottomIcon") },
                 label = { Text(text= item.title, fontSize = 13.sp) },
                 colors = NavigationBarItemDefaults.colors(selectedTextColor = Red, unselectedIconColor = Gray)
