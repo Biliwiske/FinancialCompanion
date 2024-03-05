@@ -8,8 +8,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kiselev.financialcompanion.screens.BudgetScreen
 import com.kiselev.financialcompanion.screens.GraphScreen
+import com.kiselev.financialcompanion.screens.LoginScreen
 import com.kiselev.financialcompanion.screens.OperationAdd
 import com.kiselev.financialcompanion.screens.OperationScreen
+import com.kiselev.financialcompanion.screens.RegistrationScreen
+import com.kiselev.financialcompanion.screens.WelcomeScreen
 
 @Composable
 fun MainNavGraph() {
@@ -20,6 +23,20 @@ fun MainNavGraph() {
     ) {
         composable(route = "BottomNavGraph") { MainScreen(navController) }
         composable(route = "OtherNavGraph") { OtherNavGraph() }
+    }
+}
+
+@Composable
+fun EntryNavGraph() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "Welcome"
+    ) {
+        composable(route = "Welcome") { WelcomeScreen(navController) }
+        composable(route = "Login") { LoginScreen(navController) }
+        composable(route = "Registration") { RegistrationScreen(navController) }
+        composable(route = "MainNavGraph") { MainNavGraph()}
     }
 }
 

@@ -19,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,17 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.kiselev.financialcompanion.R
+import com.kiselev.financialcompanion.ui.theme.InterFamily
 
-val InterFamily = FontFamily(
-    Font(R.font.inter_black, FontWeight.Black),
-    Font(R.font.inter_bold, FontWeight.Bold),
-    Font(R.font.inter_extrabold, FontWeight.ExtraBold),
-    Font(R.font.inter_extralight, FontWeight.ExtraLight),
-    Font(R.font.inter_light, FontWeight.Light),
-    Font(R.font.inter_medium, FontWeight.Medium),
-    Font(R.font.inter_regular, FontWeight.Normal),
-    Font(R.font.inter_semibold, FontWeight.SemiBold),
-    Font(R.font.inter_thin, FontWeight.Thin))
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(showBackground = true)
@@ -67,7 +56,7 @@ fun OperationAdd() {
             IconButton(
                 onClick = { navController.popBackStack() }) {
                 Icon(
-                    painter = painterResource(R.drawable.baseline_arrow_back_24),
+                    painter = painterResource(R.drawable.arrow_back),
                     contentDescription = "Назад",
                     modifier = Modifier.align(Alignment.CenterVertically)
                 )

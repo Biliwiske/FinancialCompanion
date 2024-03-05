@@ -1,5 +1,6 @@
 package com.kiselev.financialcompanion.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +31,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import com.kiselev.financialcompanion.model.Transaction
+import com.kiselev.financialcompanion.model.TransactionApi
 import com.kiselev.financialcompanion.ui.theme.primaryColor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
+@SuppressLint("CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OperationScreen(navController: NavController) {
@@ -55,6 +63,14 @@ fun OperationScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(it))
             {
+                val retrofit = Retrofit.Builder()
+                    .baseUrl("http://192.168.1.28/financial-companion-server/")
+                    .addConverterFactory(GsonConverterFactory.create()).build()
+                val transactionApi = retrofit.create(TransactionApi::class.java)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val transactions: List<Transaction> = transactionApi.getTransactions()
+                    println(transactions)
+                }
                 RecyclerView()
             }
         })

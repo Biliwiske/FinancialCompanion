@@ -1,4 +1,4 @@
-package com.kiselev.financialcompanion
+package com.kiselev.financialcompanion.model
 
 data class Transaction(
     val id: Int,
