@@ -63,6 +63,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
@@ -257,63 +258,7 @@ fun RegistrationScreen(navController: NavController) {
                 focusRequesterManager.clearFocus()
                 setIsLoading(true)
 
-                var allFieldsValid = true
 
-                if (name.isEmpty()) {
-                    setErrorName(true)
-                    allFieldsValid = false
-                } else {
-                    setErrorName(false)
-                }
-
-                if (email.isEmpty()) {
-                    setErrorEmail(true)
-                    allFieldsValid = false
-                } else {
-                    setErrorEmail(false)
-                }
-
-                if (password.isEmpty()) {
-                    setErrorPassword(true)
-                    allFieldsValid = false
-                } else if (password.length < 8) {
-                    setErrorMessage("Пароль должен быть не менее 8 символов")
-                    setIsLoading(false)
-                    return@Button
-                } else {
-                    setErrorPassword(false)
-                }
-
-                if (password2.isEmpty()) {
-                    setErrorPassword2(true)
-                    allFieldsValid = false
-                } else {
-                    setErrorPassword2(false)
-                }
-
-                if (!allFieldsValid) {
-                    setErrorMessage("Вы ввели не все данные")
-                    setIsLoading(false)
-                    return@Button
-                }
-
-                if(!isEmailValid(email)) {
-                    setErrorEmail(true)
-                    setErrorMessage("Неверный формат email")
-                    setIsLoading(false)
-                    return@Button
-                }
-
-                if (password != password2) {
-                    setErrorPassword(true)
-                    setErrorPassword2(true)
-                    setErrorMessage("Пароли не совпадают")
-                    setIsLoading(false)
-                    return@Button
-                } else {
-                    setErrorPassword(false)
-                    setErrorPassword2(false)
-                }
 
                 val gson = GsonBuilder().setLenient().create()
                 val retrofit = Retrofit.Builder()
@@ -324,18 +269,20 @@ fun RegistrationScreen(navController: NavController) {
 
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        val response = userApi.registration(
-                            mapOf("user" to User(name = name, email = email, password = password,)
-                        ))
-                        if (response == "Регистрация прошла успешно") {
+                        val response = userApi.registration(mapOf("user" to User(name = name, email = email, password = password,)))
+
+                        val jsonResponse = JSONObject(response)
+                        val success = jsonResponse.getBoolean("success")
+                        val message = jsonResponse.getString("message")
+
+                        if (success) {
                             withContext(Dispatchers.Main) {
                                 setIsLoading(false)
                                 navController.navigate(route = "MainNavGraph")
                             }
                         } else {
                             setIsLoading(false)
-                            print(response)
-                            setErrorMessage("$response")
+                            setErrorMessage(message)
                         }
                     } catch (e: Exception) {
                         setIsLoading(false)

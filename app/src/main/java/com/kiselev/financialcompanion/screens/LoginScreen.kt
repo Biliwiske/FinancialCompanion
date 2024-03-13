@@ -1,5 +1,7 @@
 package com.kiselev.financialcompanion.screens
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -30,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import androidx.preference.PreferenceManager
 import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.R
 import com.kiselev.financialcompanion.model.User
@@ -60,11 +64,15 @@ import com.kiselev.financialcompanion.ui.theme.grayColor
 import com.kiselev.financialcompanion.ui.theme.primaryColor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.internal.NoOpContinuation.context
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.jvm.internal.CompletedContinuation.context
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
@@ -196,62 +204,41 @@ fun LoginScreen(navController: NavController){
                 setIsLoading(true)
                 setErrorMessage("")
 
-                var allFieldsValid = true
-
-                if (email.isEmpty()) {
-                    setErrorEmail(true)
-                    allFieldsValid = false
-                } else {
-                    setErrorEmail(false)
-                }
-
-                if (password.isEmpty()) {
-                    setErrorPassword(true)
-                    allFieldsValid = false
-                } else {
-                    setErrorPassword(false)
-                }
-
-                if (!allFieldsValid) {
-                    setErrorMessage("Вы ввели не все данные")
-                    setIsLoading(false)
-                    return@Button
-                }
-
-                if(!isEmailValid(email)) {
-                    setErrorEmail(true)
-                    setErrorMessage("Неверный формат email")
-                    setIsLoading(false)
-                    return@Button
-                }
-
                 val gson = GsonBuilder().setLenient().create()
                 val retrofit = Retrofit.Builder()
                     .baseUrl("http://192.168.1.28/financial-companion-server/")
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create(gson)).build()
                 val userApi = retrofit.create(UserApi::class.java)
-
-                CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        val response = userApi.login(mapOf("user" to User(email = email, password = password)))
-                        if (response == "Успешный вход") {
-                            withContext(Dispatchers.Main) {
+                        val response : String = userApi.login(mapOf("user" to User(email = email, password = password)))
+
+                        val jsonResponse = JSONObject(response)
+                        val success = jsonResponse.getBoolean("success")
+                        val message = jsonResponse.getString("message")
+
+                        val sharedPreferences = this.getSharedPreferences("app_preferences", Context.MODE_PRIVATE)
+                        val userId = jsonResponse.getString("userId")
+                        val editor = sharedPreferences.edit()
+                        editor.putString("userId", userId)
+                        editor.apply()
+
+
+                        if (success) {
                                 setIsLoading(false)
                                 navController.navigate(route = "MainNavGraph")
-                            }
+
                         } else {
                             setErrorEmail(true)
                             setErrorPassword(true)
                             setIsLoading(false)
-                            setErrorMessage(response)
+                            setErrorMessage(message)
                         }
                     } catch (e: Exception) {
                         setIsLoading(false)
                         setErrorMessage("Ошибка подключения: попробуйте позже")
                         e.printStackTrace()
                     }
-                }
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -286,7 +273,7 @@ fun LoginScreen(navController: NavController){
             text = "Забыли пароль?",
             modifier = Modifier
                 .padding(top = 8.dp)
-                .clickable {},
+                .clickable {navController.navigate(route = "MainNavGraph")},
             color = primaryColor,
             fontWeight = FontWeight.Medium,
             fontFamily = InterFamily,
@@ -304,6 +291,8 @@ fun LoginScreen(navController: NavController){
         )
     }
 }
+
+
 
 @Preview(showBackground = true)
 @Composable

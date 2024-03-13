@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -63,13 +64,17 @@ fun OperationScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(it))
             {
-                val retrofit = Retrofit.Builder()
-                    .baseUrl("http://192.168.1.28/financial-companion-server/")
-                    .addConverterFactory(GsonConverterFactory.create()).build()
-                val transactionApi = retrofit.create(TransactionApi::class.java)
-                CoroutineScope(Dispatchers.IO).launch {
-                    val transactions: List<Transaction> = transactionApi.getTransactions()
-                    println(transactions)
+                try{
+                    val retrofit = Retrofit.Builder()
+                        .baseUrl("http://192.168.1.28/financial-companion-server/")
+                        .addConverterFactory(GsonConverterFactory.create()).build()
+                    val transactionApi = retrofit.create(TransactionApi::class.java)
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val transactions: List<Transaction> = transactionApi.getTransactions()
+                        println(transactions)
+                    }
+                } catch (e: Exception){
+                    e.printStackTrace()
                 }
                 RecyclerView()
             }
@@ -112,6 +117,7 @@ fun ListItem(date: String, name: String, cost: String){
             .fillMaxWidth()) {
             Row {
                 Column(modifier = Modifier.weight(1f)) {
+
                     Text(text = name, fontSize = 18.sp)
                     Text(text = date)
                 }

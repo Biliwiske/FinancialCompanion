@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.core.view.WindowCompat
 import com.kiselev.financialcompanion.ui.theme.FinancialCompanionTheme
 
 class MainActivity : ComponentActivity() {
