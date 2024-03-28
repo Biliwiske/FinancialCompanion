@@ -8,5 +8,5 @@ interface UserApi {
     suspend fun registration(@Body user: Map<String, User>): String
 
     @POST("login.php")
-    fun login(@Body user: Map<String, User>): String
+    suspend fun login(@Body user: Map<String, User>): String
 }

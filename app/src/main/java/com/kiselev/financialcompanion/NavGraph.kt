@@ -1,6 +1,8 @@
 package com.kiselev.financialcompanion
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -34,8 +36,8 @@ fun EntryNavGraph() {
         startDestination = "Welcome"
     ) {
         composable(route = "Welcome") { WelcomeScreen(navController) }
-        composable(route = "Login") { LoginScreen(navController) }
-        composable(route = "Registration") { RegistrationScreen(navController) }
+        composable(route = "Login") { LoginScreen(viewModel = viewModel(), navController) }
+        composable(route = "Registration") { RegistrationScreen(viewModel = viewModel(), navController) }
         composable(route = "MainNavGraph") { MainNavGraph()}
     }
 }

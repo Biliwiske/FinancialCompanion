@@ -23,22 +23,21 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -50,45 +49,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.R
-import com.kiselev.financialcompanion.model.User
-import com.kiselev.financialcompanion.model.UserApi
+import com.kiselev.financialcompanion.controller.RegistrationViewController
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor
 import com.kiselev.financialcompanion.ui.theme.primaryColor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.json.JSONObject
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-
-fun RegistrationScreen(navController: NavController) {
+fun RegistrationScreen(viewModel: RegistrationViewController, navController: NavController) {
     val (email, setEmail) = remember { mutableStateOf("") }
     val (password, setPassword) = remember { mutableStateOf("") }
     val (name, setName) = remember { mutableStateOf("") }
     val (password2, setPassword2) = remember { mutableStateOf("") }
-
-    val (errorMessage, setErrorMessage) = remember { mutableStateOf("") }
-    val (isLoading, setIsLoading) = remember { mutableStateOf(false) }
-    var (error_name, setErrorName) = remember { mutableStateOf(false) }
-    val (error_email, setErrorEmail) = remember { mutableStateOf(false) }
-    val (error_password, setErrorPassword) = remember { mutableStateOf(false) }
-    val (error_password2, setErrorPassword2) = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequesterManager = LocalFocusManager.current
 
-    if(isLoading){
+    if(viewModel.isLoading){
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
@@ -169,9 +150,9 @@ fun RegistrationScreen(navController: NavController) {
                 fontFamily = InterFamily
             ) },
             leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = null)},
-            isError = error_name,
+            isError = viewModel.errorName,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.Black,
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
@@ -190,9 +171,9 @@ fun RegistrationScreen(navController: NavController) {
                 fontWeight = FontWeight.Light,
                 fontFamily = InterFamily) },
             leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null) },
-            isError = error_email,
+            isError = viewModel.errorEmail,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.Black,
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
@@ -200,7 +181,6 @@ fun RegistrationScreen(navController: NavController) {
                 focusedBorderColor = primaryColor,
                 unfocusedBorderColor = grayColor,
                 focusedLabelColor = primaryColor),
-
         )
 
         OutlinedTextField(
@@ -212,10 +192,10 @@ fun RegistrationScreen(navController: NavController) {
                 fontWeight = FontWeight.Light,
                 fontFamily = InterFamily) },
             leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null)},
-            isError = error_password,
+            isError = viewModel.errorPassword,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.Black,
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
@@ -234,7 +214,7 @@ fun RegistrationScreen(navController: NavController) {
                 fontWeight = FontWeight.Light,
                 fontFamily = InterFamily) },
             leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null)},
-            isError = error_password2,
+            isError = viewModel.errorPassword2,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
@@ -243,7 +223,7 @@ fun RegistrationScreen(navController: NavController) {
                     focusRequesterManager.clearFocus()
                 }
             ),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.Black,
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
@@ -256,40 +236,7 @@ fun RegistrationScreen(navController: NavController) {
         Button(
             onClick = {
                 focusRequesterManager.clearFocus()
-                setIsLoading(true)
-
-
-
-                val gson = GsonBuilder().setLenient().create()
-                val retrofit = Retrofit.Builder()
-                    .baseUrl("http://192.168.1.28/financial-companion-server/")
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .addConverterFactory(GsonConverterFactory.create(gson)).build()
-                val userApi = retrofit.create(UserApi::class.java)
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val response = userApi.registration(mapOf("user" to User(name = name, email = email, password = password,)))
-
-                        val jsonResponse = JSONObject(response)
-                        val success = jsonResponse.getBoolean("success")
-                        val message = jsonResponse.getString("message")
-
-                        if (success) {
-                            withContext(Dispatchers.Main) {
-                                setIsLoading(false)
-                                navController.navigate(route = "MainNavGraph")
-                            }
-                        } else {
-                            setIsLoading(false)
-                            setErrorMessage(message)
-                        }
-                    } catch (e: Exception) {
-                        setIsLoading(false)
-                        setErrorMessage("Ошибка подключения: попробуйте позже")
-                        e.printStackTrace()
-                    }
-                }
+                viewModel.registerUser(name, email, password, password2, navController, context)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -301,7 +248,7 @@ fun RegistrationScreen(navController: NavController) {
                 fontFamily = InterFamily)
         }
 
-        if (errorMessage.isNotEmpty()) {
+        if (viewModel.errorMessage.isNotEmpty()) {
             Row(
                 modifier = Modifier.padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -311,7 +258,7 @@ fun RegistrationScreen(navController: NavController) {
                     contentDescription = "Ошибка",
                     tint = Color.Red)
                 Text(
-                    text = errorMessage,
+                    text = viewModel.errorMessage,
                     modifier = Modifier.padding(start = 6.dp),
                     color = Color.Red,
                     fontWeight = FontWeight.Medium,
@@ -343,13 +290,8 @@ fun RegistrationScreen(navController: NavController) {
     }
 }
 
-fun isEmailValid(email: String): Boolean {
-    val regex = Regex("""^([a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)$""")
-    return regex.matches(email)
-}
-
 @Preview(showBackground = true)
 @Composable
 fun PreviewRegistration(){
-    RegistrationScreen(navController = rememberNavController())
+    RegistrationScreen(viewModel = viewModel(), navController = rememberNavController())
 }

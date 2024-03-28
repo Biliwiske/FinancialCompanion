@@ -42,7 +42,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 @SuppressLint("CoroutineCreationDuringComposition")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OperationScreen(navController: NavController) {
     Scaffold(
@@ -64,18 +63,22 @@ fun OperationScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(it))
             {
+                """
                 try{
+                    
                     val retrofit = Retrofit.Builder()
-                        .baseUrl("http://192.168.1.28/financial-companion-server/")
+                        .baseUrl("http://192.168.1.59/financial-companion-server/")
                         .addConverterFactory(GsonConverterFactory.create()).build()
                     val transactionApi = retrofit.create(TransactionApi::class.java)
                     CoroutineScope(Dispatchers.IO).launch {
                         val transactions: List<Transaction> = transactionApi.getTransactions()
                         println(transactions)
                     }
+                    
                 } catch (e: Exception){
                     e.printStackTrace()
                 }
+                """
                 RecyclerView()
             }
         })
