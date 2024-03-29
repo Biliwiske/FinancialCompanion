@@ -67,7 +67,7 @@ fun OperationScreen(navController: NavController) {
                 try{
                     
                     val retrofit = Retrofit.Builder()
-                        .baseUrl("http://192.168.1.59/financial-companion-server/")
+                        .baseUrl("http://192.168.1.30/financial-companion-server/")
                         .addConverterFactory(GsonConverterFactory.create()).build()
                     val transactionApi = retrofit.create(TransactionApi::class.java)
                     CoroutineScope(Dispatchers.IO).launch {

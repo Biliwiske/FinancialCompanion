@@ -1,7 +1,6 @@
 package com.kiselev.financialcompanion.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -24,19 +23,18 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -52,39 +50,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.core.content.ContentProviderCompat.requireContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.R
 import com.kiselev.financialcompanion.controller.LoginViewModel
-import com.kiselev.financialcompanion.model.User
-import com.kiselev.financialcompanion.model.UserApi
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor
 import com.kiselev.financialcompanion.ui.theme.primaryColor
-import org.json.JSONObject
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
 
 @SuppressLint("SuspiciousIndentation")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
     val (email, setEmail) = remember { mutableStateOf("") }
     val (password, setPassword) = remember { mutableStateOf("") }
-
-    val (errorMessage, setErrorMessage) = remember { mutableStateOf("") }
-    val (isLoading, setIsLoading) = remember { mutableStateOf(false) }
-    val (errorEmail, setErrorEmail) = remember { mutableStateOf(false) }
-    val (errorPassword, setErrorPassword) = remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequesterManager = LocalFocusManager.current
 
-    if(isLoading){
+    if(viewModel.isLoading){
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
@@ -94,6 +77,13 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
     }
     Column(
         modifier = Modifier
+            .run {
+                if (viewModel.isLoading) {
+                    blur(radius = 4.dp)
+                } else {
+                    this
+                }
+            }
             .fillMaxSize()
             .background(Color.White)
             .padding(all = 16.dp)
@@ -159,9 +149,9 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
                 fontWeight = FontWeight.Light,
                 fontFamily = InterFamily) },
             leadingIcon = { Icon(Icons.Filled.Email, contentDescription = null)},
-            isError = errorEmail,
+            isError = viewModel.errorEmail,
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.Black,
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
@@ -179,14 +169,14 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
                 fontWeight = FontWeight.Light,
                 fontFamily = InterFamily) },
             leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = null)},
-            isError = errorPassword,
+            isError = viewModel.errorPassword,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(
                 onDone = {
                     keyboardController?.hide()
                     focusRequesterManager.clearFocus() }),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 cursorColor = Color.Black,
                 errorBorderColor = Color.Red,
                 errorLabelColor = Color.Red,
@@ -198,11 +188,12 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
         Button(
             onClick = {
                 focusRequesterManager.clearFocus()
-                viewModel.login(email, password)
+                viewModel.login(email, password, navController, context)
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
+            enabled = !viewModel.isLoading,
             colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
             shape = RoundedCornerShape(4.dp)
         ) {
@@ -212,7 +203,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
                 fontFamily = InterFamily)
         }
 
-        if (errorMessage.isNotEmpty()) {
+        if (viewModel.errorMessage.isNotEmpty()) {
             Row(
                 modifier = Modifier.padding(top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -222,7 +213,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
                     contentDescription = "Ошибка",
                     tint = Color.Red)
                 Text(
-                    text = errorMessage,
+                    text = viewModel.errorMessage,
                     modifier = Modifier.padding(start = 6.dp),
                     color = Color.Red,
                     fontWeight = FontWeight.Medium,

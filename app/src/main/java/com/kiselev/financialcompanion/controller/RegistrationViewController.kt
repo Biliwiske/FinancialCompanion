@@ -29,7 +29,7 @@ class RegistrationViewController : ViewModel() {
 
     private val gson = GsonBuilder().setLenient().create()
     private val retrofit = Retrofit.Builder()
-        .baseUrl("http://192.168.1.59/financial-companion-server/")
+        .baseUrl("http://192.168.1.30/financial-companion-server/")
         .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create(gson)).build()
     private val userApi = retrofit.create(UserApi::class.java)
@@ -71,6 +71,20 @@ class RegistrationViewController : ViewModel() {
         if (!isEmailValid(email)){
             errorMessage = "Пожалуйста, введите email корректно."
             errorEmail = true
+            isLoading = false
+            return false
+        }
+
+        if (password.length < 8){
+            errorMessage = "Пароль должен быть не менее 8 символов."
+            errorPassword = true
+            isLoading = false
+            return false
+        }
+
+        if (password.length > 64){
+            errorMessage = "Пароль должен быть не более 64 символов."
+            errorPassword = true
             isLoading = false
             return false
         }

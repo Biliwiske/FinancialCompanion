@@ -34,7 +34,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -79,6 +81,13 @@ fun RegistrationScreen(viewModel: RegistrationViewController, navController: Nav
     }
     Column(
         modifier = Modifier
+            .run {
+                if (viewModel.isLoading) {
+                    blur(radius = 4.dp)
+                } else {
+                    this
+                }
+            }
             .fillMaxSize()
             .background(Color.White)
             .padding(all = 16.dp)
@@ -89,7 +98,7 @@ fun RegistrationScreen(viewModel: RegistrationViewController, navController: Nav
                     focusRequesterManager.clearFocus()
                 })
             }
-    ) {
+    ){
         Text(
             text = "Финансовый ассистент",
             modifier = Modifier
@@ -241,6 +250,7 @@ fun RegistrationScreen(viewModel: RegistrationViewController, navController: Nav
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 16.dp),
+            enabled = !viewModel.isLoading,
             colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
             shape = RoundedCornerShape(6.dp)
         ) {
