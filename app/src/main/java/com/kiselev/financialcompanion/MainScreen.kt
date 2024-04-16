@@ -27,6 +27,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,10 +37,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.primaryColor
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(mainController: NavHostController) {
     val navController = rememberNavController()
@@ -57,10 +59,12 @@ fun BottomNavigation(navController: NavController) {
     val listItems = listOf(
         NavigationItem.Operation,
         NavigationItem.Budget,
-        NavigationItem.Graph
+        NavigationItem.Graph,
+        NavigationItem.Profile
     )
     var selectedItem = 0
     NavigationBar(
+        modifier = Modifier.height(56.dp),
         containerColor = Color.White
     ) {
         val backStackEntry by navController.currentBackStackEntryAsState()
@@ -85,7 +89,10 @@ fun BottomNavigation(navController: NavController) {
                     Text(
                         text = item.title,
                         color = if(selectedItem == item.number) primaryColor else Color.Black,
-                        fontSize = 12.sp) },
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = InterFamily,
+                    ) },
             )
         }
     }

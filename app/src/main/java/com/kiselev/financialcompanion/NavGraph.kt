@@ -2,7 +2,6 @@ package com.kiselev.financialcompanion
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -17,19 +16,7 @@ import com.kiselev.financialcompanion.screens.RegistrationScreen
 import com.kiselev.financialcompanion.screens.WelcomeScreen
 
 @Composable
-fun MainNavGraph() {
-    val navController = rememberNavController()
-    NavHost(
-        navController = navController,
-        startDestination = "BottomNavGraph"
-    ) {
-        composable(route = "BottomNavGraph") { MainScreen(navController) }
-        composable(route = "OtherNavGraph") { OtherNavGraph() }
-    }
-}
-
-@Composable
-fun EntryNavGraph() {
+fun AuthNavGraph() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -43,14 +30,27 @@ fun EntryNavGraph() {
 }
 
 @Composable
+fun MainNavGraph() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController,
+        startDestination = "BottomNavGraph"
+    ) {
+        composable(route = "BottomNavGraph") { MainScreen(navController) }
+        composable(route = "OtherNavGraph") { OtherNavGraph() }
+    }
+}
+
+@Composable
 fun BottomNavGraph(navController: NavController, mainController: NavHostController) {
     NavHost(
         navController = navController as NavHostController,
         startDestination = "Operation"
     ) {
-        composable(route = "Operation") { OperationScreen(mainController) }
+        composable(route = "Operation") { OperationScreen(viewModel = viewModel(), mainController) }
         composable(route = "Budget") { BudgetScreen() }
         composable(route = "Graph") { GraphScreen() }
+        composable(route = "Profile") { GraphScreen() }
     }
 }
 

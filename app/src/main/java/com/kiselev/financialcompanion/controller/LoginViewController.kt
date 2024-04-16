@@ -1,6 +1,7 @@
 package com.kiselev.financialcompanion.controller
 
 import android.content.Context
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -73,6 +74,11 @@ class LoginViewModel : ViewModel() {
         return true
     }
 
+    private fun isEmailValid(email: String): Boolean {
+        val regex = Regex("""^([a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)$""")
+        return regex.matches(email )
+    }
+
     private fun handleLoginResponse(response: String, navController: NavController, context: Context) {
         val jsonResponse = JSONObject(response)
         val success = jsonResponse.getBoolean("success")
@@ -90,20 +96,15 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    private fun isEmailValid(email: String): Boolean {
-        val regex = Regex("""^([a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)$""")
-        return regex.matches(email )
-    }
-
     private fun handleLoginError(e: Exception) {
         errorMessage = "Ошибка подключения: попробуйте позже"
         e.printStackTrace()
     }
 
     private fun saveUserId(userId: Int, context: Context) {
-        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putInt("user_id", userId)
-        editor.apply()
+        val dataStore = StorageController(context)
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.saveId(userId)
+        }
     }
 }
