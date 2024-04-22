@@ -17,7 +17,7 @@ import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class OperationViewController : ViewModel() {
+class OperationController : ViewModel() {
     private var transactions : List<Transaction>? = null
     private val gson = GsonBuilder().setLenient().create()
     private val retrofit = Retrofit.Builder()
@@ -96,7 +96,6 @@ class OperationViewController : ViewModel() {
 
         for (transaction in transactions) {
             val transactionDate = dateFormat.parse(transaction.date)
-
             val amountToAdd = if (transaction.type == 1) -transaction.amount else transaction.amount
 
             if (dailySum.containsKey(transactionDate)) {

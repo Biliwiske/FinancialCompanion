@@ -1,5 +1,7 @@
 package com.kiselev.financialcompanion
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -7,13 +9,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.kiselev.financialcompanion.screens.BudgetScreen
-import com.kiselev.financialcompanion.screens.GraphScreen
-import com.kiselev.financialcompanion.screens.LoginScreen
-import com.kiselev.financialcompanion.screens.OperationAdd
-import com.kiselev.financialcompanion.screens.OperationScreen
-import com.kiselev.financialcompanion.screens.RegistrationScreen
-import com.kiselev.financialcompanion.screens.WelcomeScreen
+import com.kiselev.financialcompanion.view.BudgetScreen
+import com.kiselev.financialcompanion.view.GraphScreen
+import com.kiselev.financialcompanion.view.LoginScreen
+import com.kiselev.financialcompanion.view.OperationAdd
+import com.kiselev.financialcompanion.view.OperationScreen
+import com.kiselev.financialcompanion.view.RegistrationScreen
+import com.kiselev.financialcompanion.view.WelcomeScreen
 
 @Composable
 fun AuthNavGraph() {
@@ -54,6 +56,7 @@ fun BottomNavGraph(navController: NavController, mainController: NavHostControll
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun OtherNavGraph() {
     val navController = rememberNavController()
@@ -61,6 +64,6 @@ fun OtherNavGraph() {
         navController = navController,
         startDestination = "OperationAdd"
     ) {
-        composable(route = "OperationAdd") { OperationAdd() }
+        composable(route = "OperationAdd") { OperationAdd(viewModel(), navController) }
     }
 }

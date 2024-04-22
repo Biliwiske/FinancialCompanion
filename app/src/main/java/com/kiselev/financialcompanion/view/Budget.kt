@@ -1,4 +1,4 @@
-package com.kiselev.financialcompanion.screens
+package com.kiselev.financialcompanion.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

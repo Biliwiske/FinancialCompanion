@@ -1,4 +1,4 @@
-package com.kiselev.financialcompanion.screens
+package com.kiselev.financialcompanion.view
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -36,9 +35,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -48,8 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.kiselev.financialcompanion.R
-import com.kiselev.financialcompanion.controller.OperationViewController
+import com.kiselev.financialcompanion.controller.OperationController
 import com.kiselev.financialcompanion.model.Transaction
 import com.kiselev.financialcompanion.model.getCategoryIcon
 import com.kiselev.financialcompanion.ui.theme.InterFamily
@@ -62,7 +58,7 @@ import java.util.Locale
 
 @SuppressLint("CoroutineCreationDuringComposition")
 @Composable
-fun OperationScreen(viewModel: OperationViewController, navController: NavController) {
+fun OperationScreen(viewModel: OperationController, navController: NavController) {
     val context = LocalContext.current
     var transactions by remember { mutableStateOf<List<Transaction>?>(null) }
     LaunchedEffect(key1 = Unit) {

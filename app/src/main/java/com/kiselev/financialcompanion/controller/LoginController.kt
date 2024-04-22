@@ -18,11 +18,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-class RegistrationViewController : ViewModel() {
-    var errorName by mutableStateOf (false)
+class LoginViewModel : ViewModel() {
     var errorEmail by mutableStateOf (false)
     var errorPassword by mutableStateOf (false)
-    var errorPassword2 by mutableStateOf (false)
 
     var errorMessage by mutableStateOf ("")
     var isLoading by mutableStateOf (false)
@@ -34,15 +32,14 @@ class RegistrationViewController : ViewModel() {
         .addConverterFactory(GsonConverterFactory.create(gson)).build()
     private val userApi = retrofit.create(UserApi::class.java)
 
-    fun registerUser(name: String, email: String, password: String, password2:String,
-                     navController: NavController, context: Context) {
+    fun login(email: String, password: String, navController: NavController, context: Context) {
         errorMessage = ""
         isLoading = true
-        if(!validateFields(name,email,password, password2)) return
+        if(!validateFields(email,password)) return
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = userApi.registration(mapOf("user" to User(name = name, email = email, password = password)))
+                val response = userApi.login(mapOf("user" to User(name="", email = email, password = password)))
                 withContext(Dispatchers.Main) {
                     handleLoginResponse(response, navController, context)
                 }
@@ -56,13 +53,11 @@ class RegistrationViewController : ViewModel() {
         }
     }
 
-    private fun validateFields(name: String, email: String, password: String, password2:String): Boolean{
-        errorName = name.isEmpty()
+    private fun validateFields(email: String, password: String): Boolean{
         errorEmail = email.isEmpty()
         errorPassword = password.isEmpty()
-        errorPassword2 = password2.isEmpty()
 
-        if (errorName || errorEmail || errorPassword || errorPassword2) {
+        if (errorEmail || errorPassword) {
             errorMessage = "Пожалуйста, заполните все поля."
             isLoading = false
             return false
@@ -75,29 +70,12 @@ class RegistrationViewController : ViewModel() {
             return false
         }
 
-        if (password.length < 8){
-            errorMessage = "Пароль должен быть не менее 8 символов."
-            errorPassword = true
-            isLoading = false
-            return false
-        }
-
-        if (password.length > 64){
-            errorMessage = "Пароль должен быть не более 64 символов."
-            errorPassword = true
-            isLoading = false
-            return false
-        }
-
-        if (password != password2) {
-            errorMessage = "Пароли не совпадают."
-            errorPassword = true
-            errorPassword2 = true
-            isLoading = false
-            return false
-        }
-
         return true
+    }
+
+    private fun isEmailValid(email: String): Boolean {
+        val regex = Regex("""^([a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)$""")
+        return regex.matches(email )
     }
 
     private fun handleLoginResponse(response: String, navController: NavController, context: Context) {
@@ -109,15 +87,12 @@ class RegistrationViewController : ViewModel() {
             val id = jsonResponse.getInt("id")
             saveUserId(id, context)
             navController.navigate(route = "MainNavGraph")
-        } else if(message == "Данный email уже зарегистрирован"){
+        } else if(message == "Неверные данные"){
+            isLoading = false
             errorEmail = true
+            errorPassword = true
             errorMessage = message
         }
-    }
-
-    private fun isEmailValid(email: String): Boolean {
-        val regex = Regex("""^([a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+)$""")
-        return regex.matches(email )
     }
 
     private fun handleLoginError(e: Exception) {
@@ -126,9 +101,9 @@ class RegistrationViewController : ViewModel() {
     }
 
     private fun saveUserId(userId: Int, context: Context) {
-        val sharedPreferences = context.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putInt("user_id", userId)
-        editor.apply()
+        val dataStore = StorageController(context)
+        CoroutineScope(Dispatchers.IO).launch {
+            dataStore.saveId(userId)
+        }
     }
 }
