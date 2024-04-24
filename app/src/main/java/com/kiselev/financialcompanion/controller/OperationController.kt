@@ -7,8 +7,10 @@ import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.model.ApiResponse
 import com.kiselev.financialcompanion.model.Transaction
 import com.kiselev.financialcompanion.model.TransactionApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import retrofit2.Retrofit
@@ -48,25 +50,42 @@ class OperationController : ViewModel() {
         }
     }
 
+    fun addTransaction(date: String, amount: Int, description: String, type: Int, category: String, account_name: String, context: Context){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val userId = readUserId(context)
+                val response = transactionApi.addTransaction(mapOf("transaction" to Transaction(id_transaction = -1, date = date, amount = amount, description = description, type = type, category = category, user_id = userId!!, id_account = "3")))
+                println("response = $response")
+                withContext(Dispatchers.Main) {
+                    //handleLoginResponse(response, navController, context)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    //handleLoginError(e)
+                }
+            } finally {
+                //isLoading = false
+            }
+        }
+    }
+
     private fun handleResponse(response: Response<ApiResponse>): List<Transaction>? {
         val apiResponse = response.body()
         val transactionList = apiResponse?.transactions
-        println("Список транзакций 1 $transactionList")
         if (transactionList != null) {
             transactions = transactionList.map { transactionDto ->
                 Transaction(
-                    idTransaction = transactionDto.idTransaction,
+                    id_transaction = transactionDto.id_transaction,
                     date = transactionDto.date,
                     amount = transactionDto.amount,
                     description = transactionDto.description,
                     type = transactionDto.type,
                     category = transactionDto.category,
-                    account_name = transactionDto.account_name
+                    user_id = 54,
+                    id_account = transactionDto.id_account
                 )
             }
         }
-        println("транзакции $transactions")
-        println("Список транзакций 2 $transactionList")
         return transactionList
     }
 
@@ -104,7 +123,7 @@ class OperationController : ViewModel() {
                 dailySum[transactionDate] = amountToAdd
             }
         }
-
+        println("dailySum = $dailySum")
         return dailySum
     }
 }

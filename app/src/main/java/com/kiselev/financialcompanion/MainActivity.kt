@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                     if(id == -1)
                         AuthNavGraph()
                     else
-                        MainNavGraph()
+                        AuthNavGraph()
                 }
             }
         }

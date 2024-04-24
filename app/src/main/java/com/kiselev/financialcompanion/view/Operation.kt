@@ -76,7 +76,7 @@ fun OperationScreen(viewModel: OperationController, navController: NavController
                 contentColor = Color.White,
                 containerColor = primaryColor,
                 onClick = {
-                    navController.navigate("OtherNavGraph") {}
+                    navController.navigate("OperationAdd") {}
                 }
             ) {
                 Icon(Icons.Filled.Add,"")
@@ -187,7 +187,7 @@ fun ListItem(date: String, name: String, cost: String, type: Int, account: Strin
 
 @Composable
 fun RecyclerView(transactions: List<Transaction>, dailyTotals: Map<Date?, Int>?, ) {
-    var prevDate: Date? = null // Переменная для хранения предыдущей даты
+    var prevDate: Date? = null
     LazyColumn(
         modifier = Modifier
             .background(grayColor2)
@@ -208,7 +208,7 @@ fun RecyclerView(transactions: List<Transaction>, dailyTotals: Map<Date?, Int>?,
                 date = transaction.date,
                 cost = transaction.amount.toString(),
                 type = transaction.type,
-                account = transaction.account_name,
+                account = transaction.id_account,
                 category = transaction.category
             )
         }
@@ -222,10 +222,12 @@ fun DateHeader(date: String, amount: Int) {
     val dates = SimpleDateFormat("d", Locale.getDefault()).format(parsedDate!!)
     val formattedDate = SimpleDateFormat("MMM yyyy", Locale.getDefault()).format(parsedDate)
     val dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(parsedDate)
-    var value = ""
+    var value: String
     if(amount < 0){
         value = (amount * -1).toString()
         value = "- $value"
+    }else{
+        value = amount.toString()
     }
     HorizontalDivider(
         color = grayColor2,

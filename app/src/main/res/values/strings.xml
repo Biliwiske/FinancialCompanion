@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Financial Companion</string>
+    <string name="app_name">Финансовый ассистент</string>
 
     <string name="prompt_info_title">Sample App Authentication \n</string>
     <string name="prompt_info_subtitle">Please login to get access</string>

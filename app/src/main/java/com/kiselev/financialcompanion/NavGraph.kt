@@ -9,14 +9,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import com.kiselev.financialcompanion.view.BudgetScreen
 import com.kiselev.financialcompanion.view.GraphScreen
 import com.kiselev.financialcompanion.view.LoginScreen
 import com.kiselev.financialcompanion.view.OperationAdd
 import com.kiselev.financialcompanion.view.OperationScreen
+import com.kiselev.financialcompanion.view.ProfileAdd
+import com.kiselev.financialcompanion.view.ProfileView
 import com.kiselev.financialcompanion.view.RegistrationScreen
 import com.kiselev.financialcompanion.view.WelcomeScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AuthNavGraph() {
     val navController = rememberNavController()
@@ -25,21 +29,11 @@ fun AuthNavGraph() {
         startDestination = "Welcome"
     ) {
         composable(route = "Welcome") { WelcomeScreen(navController) }
-        composable(route = "Login") { LoginScreen(viewModel = viewModel(), navController) }
-        composable(route = "Registration") { RegistrationScreen(viewModel = viewModel(), navController) }
-        composable(route = "MainNavGraph") { MainNavGraph()}
-    }
-}
-
-@Composable
-fun MainNavGraph() {
-    val navController = rememberNavController()
-    NavHost(
-        navController = navController,
-        startDestination = "BottomNavGraph"
-    ) {
-        composable(route = "BottomNavGraph") { MainScreen(navController) }
-        composable(route = "OtherNavGraph") { OtherNavGraph() }
+        composable(route = "Login") { LoginScreen(viewModel(), navController) }
+        composable(route = "Registration") { RegistrationScreen(viewModel(), navController) }
+        composable(route = "MainScreen") { MainScreen(navController) }
+        composable(route = "ProfileAdd") { ProfileAdd(viewModel(), navController)}
+        composable(route = "OperationAdd") { OperationAdd(viewModel(), navController) }
     }
 }
 
@@ -52,18 +46,6 @@ fun BottomNavGraph(navController: NavController, mainController: NavHostControll
         composable(route = "Operation") { OperationScreen(viewModel = viewModel(), mainController) }
         composable(route = "Budget") { BudgetScreen() }
         composable(route = "Graph") { GraphScreen() }
-        composable(route = "Profile") { GraphScreen() }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Composable
-fun OtherNavGraph() {
-    val navController = rememberNavController()
-    NavHost(
-        navController = navController,
-        startDestination = "OperationAdd"
-    ) {
-        composable(route = "OperationAdd") { OperationAdd(viewModel(), navController) }
+        composable(route = "Profile") { ProfileView(viewModel = viewModel(), mainController) }
     }
 }

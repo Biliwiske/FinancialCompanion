@@ -1,6 +1,5 @@
 package com.kiselev.financialcompanion.view
 
-import android.annotation.SuppressLint
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ScrollState
@@ -35,7 +34,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,7 +41,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -51,12 +48,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import com.kiselev.financialcompanion.R
 import com.kiselev.financialcompanion.controller.OperationController
 import com.kiselev.financialcompanion.ui.theme.InterFamily
@@ -75,24 +69,19 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-@SuppressLint("Range")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OperationAdd(viewModel: OperationController, navController: NavController) {
-
-    val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
-    val (date, setDate) = remember { mutableStateOf(LocalDate.now())}
-    val (category, setCategory) = remember { mutableStateOf("") }
-    val (accountName, setAccountName) = remember { mutableStateOf("") }
-    val (amount, setAmount) = remember { mutableIntStateOf(0) }
+fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
+    val (amount, setAmount) = remember { mutableStateOf("") }
     val (description, setDescription) = remember { mutableStateOf("") }
-    val regularState = remember { mutableStateOf(false)}
-    val (type, setType) = remember { mutableStateOf("Доход")}
+    val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
+    val (date, setDate) = remember { mutableStateOf(LocalDate.now()) }
+    val regularState = remember { mutableStateOf(false) }
+    val (type, setType) = remember { mutableStateOf("Доход") }
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
 
-    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequesterManager = LocalFocusManager.current
 
@@ -122,7 +111,6 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(start = 8.dp)
-                    .weight(1f)
                     .align(Alignment.CenterVertically)
             )
             Text(
@@ -133,9 +121,8 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(end = 16.dp)
+                    .weight(1f)
                     .align(Alignment.CenterVertically)
-                    .clickable {
-                        viewModel.addTransaction(date = "$date $time", amount = amount, description = description, type = if (type == "Доход") 0 else 1, category = "1", account_name = "Наличные", context = context) }
             )
         }
         Row(
@@ -160,7 +147,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     fontFamily = InterFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 15.sp
-                    )
+                )
             }
             Button(
                 modifier = Modifier
@@ -204,7 +191,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     .padding(start = 12.dp, top = 14.dp, bottom = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(imageVector = Icons.Filled.DateRange, tint = grayColor4, contentDescription = null)
+                Icon(imageVector = Icons.Filled.DateRange, tint = grayColor4, contentDescription = null,)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     modifier = Modifier
@@ -231,8 +218,8 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                 thickness = 1.dp
             )
             TextField(
-                value = amount.toString(),
-                onValueChange = { newAmount -> setAmount(newAmount.toIntOrNull() ?: 0) },
+                value = amount,
+                onValueChange = setAmount,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(
                     text = "Сумма",
@@ -277,8 +264,8 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     unfocusedBorderColor = grayColor,
                     focusedLabelColor = primaryColor))
             TextField(
-                value = category,
-                onValueChange = setCategory,
+                value = amount,
+                onValueChange = setAmount,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(
                     text = "Категория",
@@ -300,8 +287,8 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     unfocusedBorderColor = grayColor,
                     focusedLabelColor = primaryColor))
             TextField(
-                value = accountName,
-                onValueChange = setAccountName,
+                value = amount,
+                onValueChange = setAmount,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(
                     text = "Счет",
@@ -379,11 +366,4 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
             onTimeChange = setTime
         )
     }
-}
-
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
-@Composable
-fun Previews(){
-    OperationAdd(viewModel = viewModel(), rememberNavController())
 }

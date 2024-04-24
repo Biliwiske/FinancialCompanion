@@ -225,7 +225,7 @@ fun LoginScreen(viewModel: LoginViewModel, navController: NavController){
             text = "Забыли пароль?",
             modifier = Modifier
                 .padding(top = 8.dp)
-                .clickable {navController.navigate(route = "MainNavGraph")},
+                .clickable {navController.navigate(route = "MainScreen")},
             color = primaryColor,
             fontWeight = FontWeight.Medium,
             fontFamily = InterFamily,
