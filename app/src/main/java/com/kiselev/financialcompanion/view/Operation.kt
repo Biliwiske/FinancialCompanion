@@ -127,7 +127,7 @@ fun ListItem(date: String, name: String, cost: String, type: Int, account: Strin
     val transactionColor = if(type == 0){
         primaryColor
     }else{
-        amount = "$cost"
+        amount = cost
         Color.Red
     }
     val categoryIcon = getCategoryIcon(category)
@@ -186,7 +186,7 @@ fun ListItem(date: String, name: String, cost: String, type: Int, account: Strin
 }
 
 @Composable
-fun RecyclerView(transactions: List<Transaction>, dailyTotals: Map<Date?, Int>?, ) {
+private fun RecyclerView(transactions: List<Transaction>, dailyTotals: Map<Date?, Int>?, ) {
     var prevDate: Date? = null
     LazyColumn(
         modifier = Modifier

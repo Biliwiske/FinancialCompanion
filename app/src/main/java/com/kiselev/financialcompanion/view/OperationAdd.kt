@@ -135,7 +135,11 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     .padding(end = 16.dp)
                     .align(Alignment.CenterVertically)
                     .clickable {
-                        viewModel.addTransaction(date = "$date $time", amount = amount, description = description, type = if (type == "Доход") 0 else 1, category = "1", account_name = "Наличные", context = context) }
+                        keyboardController?.hide()
+                        focusRequesterManager.clearFocus()
+                        viewModel.addTransaction(date = "$date $time", amount = amount, description = description, type = if (type == "Доход") 0 else 1, category = "1", account_name = "Наличные", context = context)
+                        navController.popBackStack()
+                    }
             )
         }
         Row(
@@ -224,7 +228,6 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     fontFamily = InterFamily,
                     color = grayColor4
                 )
-
             }
             HorizontalDivider(
                 color = grayColor,
@@ -276,29 +279,30 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     focusedBorderColor = primaryColor,
                     unfocusedBorderColor = grayColor,
                     focusedLabelColor = primaryColor))
-            TextField(
-                value = category,
-                onValueChange = setCategory,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(
-                    text = "Категория",
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, top = 14.dp, bottom = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Filled.Edit, tint = grayColor4, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if(category == "") "Категория" else category,
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .clickable { navController.navigate(route = "SelectionList") },
+                    color = grayColor4,
+                    fontSize = 16.sp,
                     fontWeight = FontWeight.Light,
-                    fontFamily = InterFamily) },
-                leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null)},
-                isError = false,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        keyboardController?.hide()
-                        focusRequesterManager.clearFocus() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    cursorColor = Color.Black,
-                    errorBorderColor = Color.Red,
-                    errorLabelColor = Color.Red,
-                    errorLeadingIconColor = Color.Red,
-                    focusedBorderColor = primaryColor,
-                    unfocusedBorderColor = grayColor,
-                    focusedLabelColor = primaryColor))
+                    fontFamily = InterFamily
+
+                )
+            }
+            HorizontalDivider(
+                color = grayColor,
+                thickness = 1.dp
+            )
             TextField(
                 value = accountName,
                 onValueChange = setAccountName,

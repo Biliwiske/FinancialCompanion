@@ -9,7 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navigation
+import com.kiselev.financialcompanion.view.BudgetAdd
 import com.kiselev.financialcompanion.view.BudgetScreen
 import com.kiselev.financialcompanion.view.GraphScreen
 import com.kiselev.financialcompanion.view.LoginScreen
@@ -18,11 +18,12 @@ import com.kiselev.financialcompanion.view.OperationScreen
 import com.kiselev.financialcompanion.view.ProfileAdd
 import com.kiselev.financialcompanion.view.ProfileView
 import com.kiselev.financialcompanion.view.RegistrationScreen
+import com.kiselev.financialcompanion.view.SelectionListScreen
 import com.kiselev.financialcompanion.view.WelcomeScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun AuthNavGraph() {
+fun MainNavGraph() {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -31,9 +32,13 @@ fun AuthNavGraph() {
         composable(route = "Welcome") { WelcomeScreen(navController) }
         composable(route = "Login") { LoginScreen(viewModel(), navController) }
         composable(route = "Registration") { RegistrationScreen(viewModel(), navController) }
+
         composable(route = "MainScreen") { MainScreen(navController) }
-        composable(route = "ProfileAdd") { ProfileAdd(viewModel(), navController)}
+
         composable(route = "OperationAdd") { OperationAdd(viewModel(), navController) }
+        composable(route = "BudgetAdd") { BudgetAdd(viewModel(), navController) }
+        composable(route = "ProfileAdd") { ProfileAdd(viewModel(), navController)}
+        composable(route = "SelectionList") { SelectionListScreen(viewModel(), navController) }
     }
 }
 
@@ -43,9 +48,9 @@ fun BottomNavGraph(navController: NavController, mainController: NavHostControll
         navController = navController as NavHostController,
         startDestination = "Operation"
     ) {
-        composable(route = "Operation") { OperationScreen(viewModel = viewModel(), mainController) }
-        composable(route = "Budget") { BudgetScreen() }
+        composable(route = "Operation") { OperationScreen(viewModel(), mainController) }
+        composable(route = "Budget") { BudgetScreen(viewModel(), mainController) }
         composable(route = "Graph") { GraphScreen() }
-        composable(route = "Profile") { ProfileView(viewModel = viewModel(), mainController) }
+        composable(route = "Profile") { ProfileView(viewModel(), mainController) }
     }
 }

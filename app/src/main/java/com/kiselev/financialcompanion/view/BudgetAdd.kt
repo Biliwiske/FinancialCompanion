@@ -48,9 +48,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.kiselev.financialcompanion.R
 import com.kiselev.financialcompanion.controller.OperationController
 import com.kiselev.financialcompanion.ui.theme.InterFamily
@@ -77,7 +80,7 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
     val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
     val (date, setDate) = remember { mutableStateOf(LocalDate.now()) }
     val regularState = remember { mutableStateOf(false) }
-    val (type, setType) = remember { mutableStateOf("Доход") }
+    val (type, setType) = remember { mutableStateOf("Категория") }
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
@@ -105,7 +108,7 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 )
             }
             Text(
-                text = "Доход",
+                text = if(type == "Счет") "На счет" else "На категорию",
                 fontFamily = InterFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 20.sp,
@@ -134,16 +137,16 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                     .height(48.dp),
                 shape = RectangleShape,
                 colors = ButtonColors(
-                    containerColor = if(type == "Доход") primaryColor else Color.White,
-                    contentColor = if(type == "Доход") Color.White else Color.Black,
+                    containerColor = if(type == "Категория") primaryColor else Color.White,
+                    contentColor = if(type == "Категория") Color.White else Color.Black,
                     disabledContainerColor = Color.White,
                     disabledContentColor = Color.Black
                 ),
                 onClick = {
-                    setType("Доход")
+                    setType("Категория")
                 }
             ){
-                Text(text = "Доход",
+                Text(text = "На категорию",
                     fontFamily = InterFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 15.sp
@@ -155,17 +158,17 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                     .height(48.dp),
                 shape = RectangleShape,
                 colors = ButtonColors(
-                    containerColor = if(type == "Расход") redColor else Color.White,
-                    contentColor = if(type == "Расход") Color.White else Color.Black,
+                    containerColor = if(type == "Счет") redColor else Color.White,
+                    contentColor = if(type == "Счет") Color.White else Color.Black,
                     disabledContainerColor = Color.White,
                     disabledContentColor = Color.Black
                 ),
                 onClick = {
-                    setType("Расход")
+                    setType("Счет")
                 }
             ){
                 Text(
-                    text = "Расход",
+                    text = "На счет",
                     fontFamily = InterFamily,
                     fontWeight = FontWeight.Medium,
                     fontSize = 15.sp
@@ -211,7 +214,37 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                     fontFamily = InterFamily,
                     color = grayColor4
                 )
-
+            }
+            HorizontalDivider(
+                color = grayColor,
+                thickness = 1.dp
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, top = 14.dp, bottom = 14.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Filled.DateRange, tint = grayColor4, contentDescription = null,)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .clickable { dateDialogState.show() },
+                    text = "$date",
+                    fontWeight = FontWeight.Light,
+                    fontFamily = InterFamily,
+                    color = grayColor4
+                )
+                Text(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .clickable { timeDialogState.show() },
+                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                    fontWeight = FontWeight.Light,
+                    fontFamily = InterFamily,
+                    color = grayColor4
+                )
             }
             HorizontalDivider(
                 color = grayColor,
@@ -268,7 +301,7 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 onValueChange = setAmount,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(
-                    text = "Категория",
+                    text = type,
                     fontWeight = FontWeight.Light,
                     fontFamily = InterFamily) },
                 leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null)},
@@ -286,50 +319,6 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                     focusedBorderColor = primaryColor,
                     unfocusedBorderColor = grayColor,
                     focusedLabelColor = primaryColor))
-            TextField(
-                value = amount,
-                onValueChange = setAmount,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(
-                    text = "Счет",
-                    fontWeight = FontWeight.Light,
-                    fontFamily = InterFamily) },
-                leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = null)},
-                isError = false,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        keyboardController?.hide()
-                        focusRequesterManager.clearFocus() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    cursorColor = Color.Black,
-                    errorBorderColor = Color.Red,
-                    errorLabelColor = Color.Red,
-                    errorLeadingIconColor = Color.Red,
-                    focusedBorderColor = primaryColor,
-                    unfocusedBorderColor = grayColor,
-                    focusedLabelColor = primaryColor))
-            Row(
-                modifier = Modifier
-                    .padding(top = 10.dp)
-                    .fillMaxWidth(),
-            ) {
-                Text(
-                    text = "Повторять операцию",
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1f)
-                        .padding(start = 12.dp),
-                    fontWeight = FontWeight.Normal,
-                    fontFamily = InterFamily,
-                    fontSize = 16.sp,
-                    color = grayColor4
-                )
-                Switch(
-                    checked = regularState.value,
-                    onCheckedChange = { regularState.value = it },
-                )
-            }
         }
     }
     MaterialDialog(
@@ -366,4 +355,11 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
             onTimeChange = setTime
         )
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun BudgetAddPreview(){
+    BudgetAdd(viewModel = viewModel(), navController = rememberNavController())
 }

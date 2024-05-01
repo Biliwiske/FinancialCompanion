@@ -7,8 +7,71 @@ data class CategoryIcon(val categoryName: String, @DrawableRes val iconResId: In
 
 fun getCategoryIcon(categoryName: String): Int {
     val categoryIcons = mapOf(
+        "Продукты" to R.drawable.ic_shopping_bag,
+        "Коммунальные услуги" to R.drawable.ic_faucet,
         "Транспорт" to R.drawable.ic_taxi_bus,
-        "Продукты" to R.drawable.ic_profile,
+        "Здоровье" to R.drawable.ic_health,
+        "Образование" to R.drawable.ic_education,
+        "Одежда" to R.drawable.ic_clothes,
+        "Развлечения" to R.drawable.ic_games,
+        "Спорт" to R.drawable.ic_sport,
+        "Транспорт" to R.drawable.ic_taxi_bus,
+        "Благотворительность" to R.drawable.ic_charity,
+
+        "Прочее" to R.drawable.ic_taxi_bus,
+
+        "Зарплата" to R.drawable.ic_money,
+        "Инвестиции" to R.drawable.ic_taxi_bus,
+        "Пособие" to R.drawable.ic_taxi_bus,
+        "Бизнес" to R.drawable.ic_taxi_bus,
+        "Аренда" to R.drawable.ic_taxi_bus,
+        "Транспорт" to R.drawable.ic_taxi_bus,
+        "Подарок" to R.drawable.ic_taxi_bus,
+        "Лотерея" to R.drawable.ic_lottery,
+        "Награда" to R.drawable.ic_taxi_bus,
     )
-    return categoryIcons[categoryName] ?: R.drawable.ic_profile
+    return categoryIcons[categoryName] ?: R.drawable.ic_logo
+}
+
+fun getCategoryIconsListIncome(): List<CategoryIcon> {
+    val categoryIcons = mapOf(
+        "Зарплата" to R.drawable.ic_money,
+        "Инвестиции" to R.drawable.ic_taxi_bus,
+        "Пособие" to R.drawable.ic_taxi_bus,
+        "Бизнес" to R.drawable.ic_taxi_bus,
+        "Аренда" to R.drawable.ic_taxi_bus,
+        "Подарок" to R.drawable.ic_taxi_bus,
+        "Лотерея" to R.drawable.ic_lottery,
+        "Награда" to R.drawable.ic_taxi_bus,
+        "Прочее" to R.drawable.ic_taxi_bus,
+    )
+    val categories = mutableListOf<CategoryIcon>()
+
+    for ((categoryName, iconResId) in categoryIcons) {
+        categories.add(CategoryIcon(categoryName, iconResId))
+    }
+
+    return categories
+}
+
+fun getCategoryIconsListExpenses(): List<CategoryIcon> {
+    val categoryIcons = mapOf(
+        "Продукты" to R.drawable.ic_shopping_bag,
+        "Коммунальные услуги" to R.drawable.ic_faucet,
+        "Транспорт" to R.drawable.ic_taxi_bus,
+        "Здоровье" to R.drawable.ic_health,
+        "Образование" to R.drawable.ic_education,
+        "Одежда" to R.drawable.ic_clothes,
+        "Развлечения" to R.drawable.ic_games,
+        "Спорт" to R.drawable.ic_sport,
+        "Благотворительность" to R.drawable.ic_charity,
+        "Прочее" to R.drawable.ic_taxi_bus,
+    )
+    val categories = mutableListOf<CategoryIcon>()
+
+    for ((categoryName, iconResId) in categoryIcons) {
+        categories.add(CategoryIcon(categoryName, iconResId))
+    }
+
+    return categories
 }
