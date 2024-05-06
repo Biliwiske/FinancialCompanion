@@ -86,7 +86,7 @@ class LoginViewModel : ViewModel() {
         if (success) {
             val id = jsonResponse.getInt("id")
             saveUserId(id, context)
-            navController.navigate(route = "MainNavGraph")
+            navController.navigate(route = "MainScreen")
         } else if(message == "Неверные данные"){
             isLoading = false
             errorEmail = true

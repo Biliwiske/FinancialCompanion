@@ -35,7 +35,8 @@ fun MainNavGraph() {
 
         composable(route = "MainScreen") { MainScreen(navController) }
 
-        composable(route = "OperationAdd") { OperationAdd(viewModel(), navController) }
+        composable(route = "OperationAdd") { entry ->
+            OperationAdd(viewModel(), navController, entry.savedStateHandle.get<String>("category")) }
         composable(route = "BudgetAdd") { BudgetAdd(viewModel(), navController) }
         composable(route = "ProfileAdd") { ProfileAdd(viewModel(), navController)}
         composable(route = "SelectionList") { SelectionListScreen(viewModel(), navController) }

@@ -33,7 +33,6 @@ class OperationController : ViewModel() {
             val userId = readUserId(context)
             if (userId != null) {
                 val response = transactionApi.getTransactions(userId)
-                println("Результат запроса = ${handleResponse(response)}")
                 if (response.isSuccessful) {
                     response.body()?.transactions
                 } else {

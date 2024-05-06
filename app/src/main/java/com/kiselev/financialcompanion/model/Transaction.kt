@@ -8,5 +8,6 @@ data class Transaction(
     val type: Int,
     val category: String,
     val user_id: Int,
-    val id_account: String
+    val id_account: String,
+    val account_name: String? = null
 )

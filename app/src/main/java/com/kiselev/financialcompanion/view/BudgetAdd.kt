@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -55,6 +56,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.kiselev.financialcompanion.R
+import com.kiselev.financialcompanion.controller.BudgetController
 import com.kiselev.financialcompanion.controller.OperationController
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor
@@ -74,17 +76,22 @@ import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
+fun BudgetAdd(viewModel: BudgetController, navController: NavController)  {
     val (amount, setAmount) = remember { mutableStateOf("") }
     val (description, setDescription) = remember { mutableStateOf("") }
-    val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
-    val (date, setDate) = remember { mutableStateOf(LocalDate.now()) }
-    val regularState = remember { mutableStateOf(false) }
+    val (timeStart, setTimeStart) = remember { mutableStateOf(LocalTime.now()) }
+    val (dateStart, setDateStart) = remember { mutableStateOf(LocalDate.now()) }
+    val (timeEnd, setTimeEnd) = remember { mutableStateOf(LocalTime.now()) }
+    val (dateEnd, setDateEnd) = remember { mutableStateOf(LocalDate.now()) }
     val (type, setType) = remember { mutableStateOf("Категория") }
 
-    val dateDialogState = rememberMaterialDialogState()
-    val timeDialogState = rememberMaterialDialogState()
+    val dateDialogStateStart = rememberMaterialDialogState()
+    val timeDialogStateStart = rememberMaterialDialogState()
 
+    val dateDialogStateEnd = rememberMaterialDialogState()
+    val timeDialogStateEnd = rememberMaterialDialogState()
+
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequesterManager = LocalFocusManager.current
 
@@ -123,6 +130,13 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 textAlign = TextAlign.End,
                 fontSize = 20.sp,
                 modifier = Modifier
+                    .clickable {
+                        keyboardController?.hide()
+                        focusRequesterManager.clearFocus()
+                        println("Время старта = $timeStart, ${timeStart.toString()}")
+                        viewModel.addBudget(name = description, amount = amount.toInt(), type = if (type == "Cчет") 0 else 1, start_date = dateStart.toString() + timeStart.toString(), end_date = dateEnd.toString() + timeEnd.toString(), context = context)
+                        navController.popBackStack()
+                    }
                     .padding(end = 16.dp)
                     .weight(1f)
                     .align(Alignment.CenterVertically)
@@ -199,8 +213,8 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 Text(
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .clickable { dateDialogState.show() },
-                    text = "$date",
+                        .clickable { dateDialogStateStart.show() },
+                    text = "$dateStart",
                     fontWeight = FontWeight.Light,
                     fontFamily = InterFamily,
                     color = grayColor4
@@ -208,8 +222,8 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 Text(
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .clickable { timeDialogState.show() },
-                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                        .clickable { timeDialogStateStart.show() },
+                    text = timeStart.format(DateTimeFormatter.ofPattern("HH:mm")),
                     fontWeight = FontWeight.Light,
                     fontFamily = InterFamily,
                     color = grayColor4
@@ -230,8 +244,8 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 Text(
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .clickable { dateDialogState.show() },
-                    text = "$date",
+                        .clickable { dateDialogStateEnd.show() },
+                    text = "$dateEnd",
                     fontWeight = FontWeight.Light,
                     fontFamily = InterFamily,
                     color = grayColor4
@@ -239,8 +253,8 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
                 Text(
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .clickable { timeDialogState.show() },
-                    text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
+                        .clickable { timeDialogStateEnd.show() },
+                    text = timeEnd.format(DateTimeFormatter.ofPattern("HH:mm")),
                     fontWeight = FontWeight.Light,
                     fontFamily = InterFamily,
                     color = grayColor4
@@ -322,37 +336,71 @@ fun BudgetAdd(viewModel: OperationController, navController: NavController)  {
         }
     }
     MaterialDialog(
-        dialogState = dateDialogState,
+        dialogState = dateDialogStateStart,
         buttons = {
             positiveButton(text = "ОК")
             negativeButton(text = "ОТМЕНА")
         }
     ){
         datepicker(
-            title = "Выберите дату транзакции",
+            title = "Выберите дату начала бюджета",
             colors =  DatePickerDefaults.colors(
                 headerBackgroundColor = primaryColor,
                 dateActiveBackgroundColor = primaryColor
             ),
-            onDateChange = setDate
+            onDateChange = setDateStart
         )
     }
     MaterialDialog(
-        dialogState = timeDialogState,
+        dialogState = timeDialogStateStart,
         buttons = {
             positiveButton(text = "ОК")
             negativeButton(text = "ОТМЕНА")
         }
     ){
         timepicker(
-            title = "Выберите время транзакции",
+            title = "Выберите время начала бюджета",
             is24HourClock = true,
             colors =  TimePickerDefaults.colors(
                 activeBackgroundColor = primaryColor,
                 inactiveBackgroundColor = grayColor2,
                 selectorColor = primaryColor
             ),
-            onTimeChange = setTime
+            onTimeChange = setTimeStart
+        )
+    }
+    MaterialDialog(
+        dialogState = dateDialogStateEnd,
+        buttons = {
+            positiveButton(text = "ОК")
+            negativeButton(text = "ОТМЕНА")
+        }
+    ){
+        datepicker(
+            title = "Выберите дату конца бюджета",
+            colors =  DatePickerDefaults.colors(
+                headerBackgroundColor = primaryColor,
+                dateActiveBackgroundColor = primaryColor
+            ),
+            onDateChange = setDateEnd
+        )
+    }
+    MaterialDialog(
+        dialogState = timeDialogStateEnd,
+        buttons = {
+            positiveButton(text = "ОК")
+            negativeButton(text = "ОТМЕНА")
+        }
+    ){
+        timepicker(
+            title = "Выберите время конца бюджета",
+            is24HourClock = true,
+            colors =  TimePickerDefaults.colors(
+                activeBackgroundColor = primaryColor,
+                inactiveBackgroundColor = grayColor2,
+                selectorColor = primaryColor
+            ),
+            onTimeChange = setTimeEnd
         )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FabPosition
@@ -31,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -40,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.kiselev.financialcompanion.controller.BudgetController
 import com.kiselev.financialcompanion.model.Budget
@@ -97,11 +101,17 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
     val endDateTime = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
     val days = ChronoUnit.DAYS.between(startDateTime, endDateTime)
 
+    val formattedEndDate = endDateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+
     val dayOfWeek = getDayOfWeek(endDateTime.dayOfWeek.value)
     val categoryIcon = getCategoryIcon("Транспорт")
 
+    Spacer(
+        modifier = Modifier.height(16.dp)
+    )
     Column (
-        modifier = Modifier.background(Color.White)
+        modifier = Modifier
+            .background(Color.White)
     ){
         Row (
             modifier = Modifier.padding(top = 4.dp)
@@ -116,7 +126,7 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
                 fontFamily = InterFamily
             )
             Text(
-                text = "до $dayOfWeek\n${endDateTime} г.",
+                text = "до $dayOfWeek\n${formattedEndDate} г.",
                 color = Color.Black,
                 style = TextStyle(letterSpacing = 0.sp),
                 modifier = Modifier
@@ -146,7 +156,10 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
         Column {
             Row() {
                 Text(
-                    modifier = Modifier.weight(1f).padding(start = 8.dp).align(Alignment.CenterVertically),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp)
+                        .align(Alignment.CenterVertically),
                     text = "10 операций",
                     color = grayColor3,
                     fontSize = 16.sp,
@@ -155,14 +168,14 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
                 )
                 Text(
                     text = "10000",
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = InterFamily
                 )
                 Text(
                     modifier = Modifier.padding(start = 4.dp, end = 4.dp),
                     text = "/",
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = InterFamily
                 )
@@ -170,12 +183,12 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
                     modifier = Modifier.padding(end = 8.dp),
                     text = amount,
                     color = primaryColor,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = InterFamily
                 )
             }
-            CustomProgressBar()
+            CustomProgressBar(progress = 14000, amount = amount.toInt())
         }
     }
 }
@@ -204,15 +217,8 @@ private fun BudgetView(budgets: List<Budget>) {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
-@Preview(showBackground = true)
 @Composable
-fun BudgetScreenPreview(){
-    BudgetItem(name = "Продукты", amount = "25000", type = 1, startDate = "2024-05-01", endDate= "2024-06-01")
-}
-
-@Composable
-fun CustomProgressBar() {
+fun CustomProgressBar(progress: Int, amount: Int) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -220,7 +226,6 @@ fun CustomProgressBar() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        val progress: Int = 50;
         Box(
             modifier = Modifier
                 .padding(top = 8.dp, bottom = 8.dp)
@@ -239,9 +244,15 @@ fun CustomProgressBar() {
                             )
                         )
                     )
-                    .width(363.dp * progress / 100)
+                    .width(363.dp * progress / amount)
             )
         }
-
     }
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@Preview(showBackground = true)
+@Composable
+fun BudgetScreenPreview(){
+    BudgetItem(name = "Продукты", amount = "25000", type = 1, startDate = "2024-05-01", endDate= "2024-06-01")
 }

@@ -208,7 +208,7 @@ private fun RecyclerView(transactions: List<Transaction>, dailyTotals: Map<Date?
                 date = transaction.date,
                 cost = transaction.amount.toString(),
                 type = transaction.type,
-                account = transaction.id_account,
+                account = transaction.account_name!!,
                 category = transaction.category
             )
         }

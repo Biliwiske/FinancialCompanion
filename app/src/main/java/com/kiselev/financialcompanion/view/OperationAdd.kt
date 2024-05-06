@@ -47,6 +47,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -78,11 +80,10 @@ import java.time.format.DateTimeFormatter
 @SuppressLint("Range")
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun OperationAdd(viewModel: OperationController, navController: NavController) {
-
+fun OperationAdd(viewModel: OperationController, navController: NavController, category: String?) {
     val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
     val (date, setDate) = remember { mutableStateOf(LocalDate.now())}
-    val (category, setCategory) = remember { mutableStateOf("") }
+    val (categoryName, _) = remember { mutableStateOf(category) }
     val (accountName, setAccountName) = remember { mutableStateOf("") }
     val (amount, setAmount) = remember { mutableIntStateOf(0) }
     val (description, setDescription) = remember { mutableStateOf("") }
@@ -116,7 +117,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                 )
             }
             Text(
-                text = "Доход",
+                text = type,
                 fontFamily = InterFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 20.sp,
@@ -137,7 +138,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
                     .clickable {
                         keyboardController?.hide()
                         focusRequesterManager.clearFocus()
-                        viewModel.addTransaction(date = "$date $time", amount = amount, description = description, type = if (type == "Доход") 0 else 1, category = "1", account_name = "Наличные", context = context)
+                        viewModel.addTransaction(date = "$date $time", amount = amount, description = description, type = if (type == "Доход") 0 else 1, category = categoryName!!, account_name = "Наличные", context = context)
                         navController.popBackStack()
                     }
             )
@@ -282,22 +283,43 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 12.dp, top = 14.dp, bottom = 14.dp),
+                    .padding(start = 12.dp, top = 16.dp, bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(imageVector = Icons.Filled.Edit, tint = grayColor4, contentDescription = null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = if(category == "") "Категория" else category,
+                Column(
                     modifier = Modifier
                         .padding(start = 8.dp)
-                        .clickable { navController.navigate(route = "SelectionList") },
-                    color = grayColor4,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Light,
-                    fontFamily = InterFamily
-
-                )
+                        .weight(1f)
+                        .clickable { navController.navigate(route = "SelectionList")}
+                ){
+                    categoryName?.let{
+                        Text(
+                            text = "Категория",
+                            color = grayColor4,
+                            fontSize = 12.sp,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false,
+                                ),
+                            ),
+                            fontWeight = FontWeight.Light,
+                            fontFamily = InterFamily)
+                    }
+                    Text(
+                        text = categoryName ?: "Категория",
+                        color = if(categoryName != null) Color.Black else grayColor4,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false,
+                            ),
+                        ),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Light,
+                        fontFamily = InterFamily
+                    )
+                }
             }
             HorizontalDivider(
                 color = grayColor,
@@ -389,5 +411,9 @@ fun OperationAdd(viewModel: OperationController, navController: NavController) {
 @Preview(showBackground = true)
 @Composable
 fun Previews(){
-    OperationAdd(viewModel = viewModel(), rememberNavController())
+    OperationAdd(
+        viewModel = viewModel(),
+        rememberNavController(),
+        "Транспорт"
+    )
 }

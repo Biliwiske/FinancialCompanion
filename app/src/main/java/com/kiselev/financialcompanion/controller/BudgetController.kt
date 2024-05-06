@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.model.Budget
 import com.kiselev.financialcompanion.model.BudgetApi
+import com.kiselev.financialcompanion.model.Transaction
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -38,6 +41,25 @@ class BudgetController : ViewModel() {
         } catch (e: Exception) {
             handleError(e)
             null
+        }
+    }
+
+    fun addBudget(name: String, amount: Int, type: Int, start_date: String, end_date: String, context: Context){
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val userId = readUserId(context)
+                val response = budgetApi.addBudget(mapOf("budget" to Budget(id = -1, name = name, amount = amount, type = type, start_date = start_date, end_date = end_date, id_user = userId!!)))
+                println("response = $response")
+                withContext(Dispatchers.Main) {
+                    //handleLoginResponse(response, navController, context)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    //handleLoginError(e)
+                }
+            } finally {
+                //isLoading = false
+            }
         }
     }
 
