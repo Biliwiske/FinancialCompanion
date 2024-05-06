@@ -12,7 +12,11 @@ interface BudgetApi {
 
     @POST("budget_add.php")
     suspend fun addBudget(@Body user: Map<String, Budget>): String
+
+    @POST("budget_calculate.php")
+    suspend fun calculate_budget(@Body data: Map<String, String>): String
 }
+
 
 data class ApiResponseBudget(
     val success: Boolean,

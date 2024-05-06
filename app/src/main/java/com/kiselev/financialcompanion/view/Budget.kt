@@ -1,5 +1,6 @@
 package com.kiselev.financialcompanion.view
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FabPosition
@@ -28,12 +28,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -43,11 +43,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.kiselev.financialcompanion.controller.BudgetController
 import com.kiselev.financialcompanion.model.Budget
-import com.kiselev.financialcompanion.model.getCategoryIcon
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor
 import com.kiselev.financialcompanion.ui.theme.grayColor2
@@ -88,7 +86,7 @@ fun BudgetScreen(viewModel: BudgetController, navController: NavController){
                 .fillMaxSize()
                 .padding(paddingValues))
             {
-                budgets?.let { BudgetView(it) }
+                budgets?.let { BudgetView(it, viewModel, context) }
             }
         }
     )
@@ -96,15 +94,12 @@ fun BudgetScreen(viewModel: BudgetController, navController: NavController){
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun BudgetItem(name: String, amount: String, type: Int, startDate: String, endDate: String){
-    val startDateTime = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+private fun BudgetItem(name: String, amount: String, type: Int, startDate: String, endDate: String, calculatedAmount: Int, rowCount: Int){
     val endDateTime = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    val days = ChronoUnit.DAYS.between(startDateTime, endDateTime)
-
     val formattedEndDate = endDateTime.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-
+    val today = LocalDate.now()
+    val days = ChronoUnit.DAYS.between(today, endDateTime)
     val dayOfWeek = getDayOfWeek(endDateTime.dayOfWeek.value)
-    val categoryIcon = getCategoryIcon("Транспорт")
 
     Spacer(
         modifier = Modifier.height(16.dp)
@@ -160,14 +155,14 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
                         .weight(1f)
                         .padding(start = 8.dp)
                         .align(Alignment.CenterVertically),
-                    text = "10 операций",
+                    text = "$rowCount операций",
                     color = grayColor3,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = InterFamily
                 )
                 Text(
-                    text = "10000",
+                    text = calculatedAmount.toString(),
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Normal,
                     fontFamily = InterFamily
@@ -188,7 +183,7 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
                     fontFamily = InterFamily
                 )
             }
-            CustomProgressBar(progress = 14000, amount = amount.toInt())
+            CustomProgressBar(progress = calculatedAmount, amount = amount.toInt())
         }
     }
 }
@@ -200,25 +195,43 @@ private fun getDayOfWeek(dayOfWeek: Int): String {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-private fun BudgetView(budgets: List<Budget>) {
+private fun BudgetView(
+    budgets: List<Budget>,
+    viewModel: BudgetController,
+    context: Context
+) {
     LazyColumn(
-        modifier = Modifier
-            .background(grayColor2)
+        modifier = Modifier.background(grayColor2)
     ) {
         items(items = budgets) { budget ->
+            val (calculatedAmount, rowCount) = remember { mutableIntStateOf(0) to mutableIntStateOf(0) }
+
+            LaunchedEffect(key1 = Unit) {
+                println("Название бюджета = ${budget.name}")
+                val (totalAmount, rows) = viewModel.calculateBudget(budget.name, context)
+                calculatedAmount.intValue = totalAmount
+                rowCount.intValue = rows
+            }
+
             BudgetItem(
                 name = budget.name,
                 amount = budget.amount.toString(),
                 type = budget.type,
                 startDate = budget.start_date,
-                endDate = budget.end_date
+                endDate = budget.end_date,
+                calculatedAmount = calculatedAmount.intValue,
+                rowCount = rowCount.intValue
             )
         }
     }
 }
 
+
 @Composable
 fun CustomProgressBar(progress: Int, amount: Int) {
+    val progressColorStart = if (progress > amount) Color(0xFFFF0000) else Color(0xFF0F9D58)
+    val progressColorEnd = if (progress > amount) Color(0xFFC62828) else Color(0xF055CA4D)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -239,8 +252,8 @@ fun CustomProgressBar(progress: Int, amount: Int) {
                     .background(
                         Brush.horizontalGradient(
                             listOf(
-                                Color(0xFF0F9D58),
-                                Color(0xF055CA4D)
+                                progressColorStart,
+                                progressColorEnd
                             )
                         )
                     )
@@ -250,9 +263,10 @@ fun CustomProgressBar(progress: Int, amount: Int) {
     }
 }
 
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun BudgetScreenPreview(){
-    BudgetItem(name = "Продукты", amount = "25000", type = 1, startDate = "2024-05-01", endDate= "2024-06-01")
+    BudgetItem(name = "Продукты", amount = "25000", type = 1, startDate = "2024-05-01", endDate= "2024-06-01", calculatedAmount = 13110, rowCount = 10)
 }
