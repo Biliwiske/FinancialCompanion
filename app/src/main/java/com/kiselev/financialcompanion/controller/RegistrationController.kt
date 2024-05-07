@@ -10,7 +10,9 @@ import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.model.User
 import com.kiselev.financialcompanion.model.UserApi
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -100,6 +102,7 @@ class RegistrationController : ViewModel() {
         return true
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun handleLoginResponse(response: String, navController: NavController, context: Context) {
         val jsonResponse = JSONObject(response)
         val success = jsonResponse.getBoolean("success")
@@ -108,6 +111,12 @@ class RegistrationController : ViewModel() {
         if (success) {
             val id = jsonResponse.getInt("id")
             saveUserId(id, context)
+
+            val dataStore = StorageController(context)
+            GlobalScope.launch {
+                dataStore.saveAuthenticationStatus(StorageController.AUTHENTICATED_STATUS)
+            }
+
             navController.navigate(route = "MainNavGraph")
         } else if(message == "Данный email уже зарегистрирован"){
             errorEmail = true

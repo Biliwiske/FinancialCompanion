@@ -23,11 +23,11 @@ import com.kiselev.financialcompanion.view.WelcomeScreen
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MainNavGraph() {
+fun MainNavGraph(startDestination: String) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
-        startDestination = "Welcome"
+        startDestination = startDestination
     ) {
         composable(route = "Welcome") { WelcomeScreen(navController) }
         composable(route = "Login") { LoginScreen(viewModel(), navController) }
@@ -43,6 +43,7 @@ fun MainNavGraph() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BottomNavGraph(navController: NavController, mainController: NavHostController) {
     NavHost(

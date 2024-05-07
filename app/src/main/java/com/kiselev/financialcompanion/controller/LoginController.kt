@@ -7,10 +7,13 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.google.gson.GsonBuilder
+import com.kiselev.financialcompanion.controller.StorageController.Companion.AUTHENTICATED_STATUS
 import com.kiselev.financialcompanion.model.User
 import com.kiselev.financialcompanion.model.UserApi
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
@@ -78,6 +81,7 @@ class LoginViewModel : ViewModel() {
         return regex.matches(email )
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private fun handleLoginResponse(response: String, navController: NavController, context: Context) {
         val jsonResponse = JSONObject(response)
         val success = jsonResponse.getBoolean("success")
@@ -86,6 +90,12 @@ class LoginViewModel : ViewModel() {
         if (success) {
             val id = jsonResponse.getInt("id")
             saveUserId(id, context)
+
+            val dataStore = StorageController(context)
+            GlobalScope.launch {
+                dataStore.saveAuthenticationStatus(AUTHENTICATED_STATUS)
+            }
+
             navController.navigate(route = "MainScreen")
         } else if(message == "Неверные данные"){
             isLoading = false
@@ -94,6 +104,7 @@ class LoginViewModel : ViewModel() {
             errorMessage = message
         }
     }
+
 
     private fun handleLoginError(e: Exception) {
         errorMessage = "Ошибка подключения: попробуйте позже"

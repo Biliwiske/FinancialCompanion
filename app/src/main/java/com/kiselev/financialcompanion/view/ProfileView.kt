@@ -5,11 +5,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -32,17 +37,12 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.kiselev.financialcompanion.controller.OperationController
 import com.kiselev.financialcompanion.controller.ProfileController
 import com.kiselev.financialcompanion.model.Account
-import com.kiselev.financialcompanion.model.Transaction
 import com.kiselev.financialcompanion.model.getCategoryIcon
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor2
 import com.kiselev.financialcompanion.ui.theme.primaryColor
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun ProfileView(viewModel: ProfileController, navController: NavController) {
@@ -62,19 +62,35 @@ fun ProfileView(viewModel: ProfileController, navController: NavController) {
                 .padding(it))
             {
                 Column(
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp).fillMaxWidth()
                 ) {
                     accounts?.let { RecyclerView(it) }
                     Text(
                         text = "Добавить счет",
                         modifier = Modifier
                             .padding(top = 8.dp)
-                            .clickable {navController.navigate("ProfileAdd")},
+                            .clickable { navController.navigate("ProfileAdd") },
                         color = primaryColor,
                         fontWeight = FontWeight.Medium,
                         fontFamily = InterFamily,
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Button(
+                        onClick = {
+                            viewModel.logout(navController, context)
+                        },
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .padding(bottom = 16.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = "Выйти из аккаунта",
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = InterFamily)
+                    }
                 }
             }
         }

@@ -2,12 +2,15 @@ package com.kiselev.financialcompanion.controller
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
 import com.google.gson.GsonBuilder
 import com.kiselev.financialcompanion.model.Account
 import com.kiselev.financialcompanion.model.AccountApi
 import com.kiselev.financialcompanion.model.Transaction
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,5 +83,15 @@ class ProfileController: ViewModel() {
         return withContext(Dispatchers.IO) {
             dataStore.getId().firstOrNull()
         }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun logout(navController: NavController, context: Context){
+        val dataStore = StorageController(context)
+
+        GlobalScope.launch {
+            dataStore.saveAuthenticationStatus(StorageController.UNAUTHENTICATED_STATUS)
+        }
+        navController.navigate("Welcome")
     }
 }
