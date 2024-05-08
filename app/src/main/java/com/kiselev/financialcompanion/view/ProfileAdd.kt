@@ -20,7 +20,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,7 +49,7 @@ import com.kiselev.financialcompanion.ui.theme.primaryColor
 @Composable
 fun ProfileAdd(viewModel: ProfileController, navController: NavController) {
     val (name, setName) = remember { mutableStateOf("") }
-    val (balance, setBalance) = remember { mutableIntStateOf(0)}
+    val (balance, setBalance) = remember { mutableStateOf("")}
     val (currency, setCurrency) = remember { mutableStateOf("")}
 
     val context = LocalContext.current
@@ -95,7 +94,7 @@ fun ProfileAdd(viewModel: ProfileController, navController: NavController) {
                     .padding(end = 16.dp)
                     .align(Alignment.CenterVertically)
                     .clickable {
-                        viewModel.addAccount(name, balance, currency, context)
+                        viewModel.addAccount(name, balance.toInt(), currency, context)
                         navController.popBackStack()
                     }
             )
@@ -133,8 +132,8 @@ fun ProfileAdd(viewModel: ProfileController, navController: NavController) {
                     unfocusedBorderColor = grayColor,
                     focusedLabelColor = primaryColor))
             TextField(
-                value = balance.toString(),
-                onValueChange = { newAmount -> setBalance(newAmount.toIntOrNull() ?: 0) },
+                value = balance,
+                onValueChange = setBalance,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(
                     text = "Текущий баланс",

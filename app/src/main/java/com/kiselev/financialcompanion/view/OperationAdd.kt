@@ -78,14 +78,13 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 @SuppressLint("Range")
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun OperationAdd(viewModel: OperationController, navController: NavController, category: String?) {
     val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
     val (date, setDate) = remember { mutableStateOf(LocalDate.now())}
     val (categoryName, _) = remember { mutableStateOf(category) }
     val (accountName, setAccountName) = remember { mutableStateOf("") }
-    val (amount, setAmount) = remember { mutableIntStateOf(0) }
+    val (amount, setAmount) = remember { mutableStateOf("") }
     val (description, setDescription) = remember { mutableStateOf("") }
     val regularState = remember { mutableStateOf(false)}
     val (type, setType) = remember { mutableStateOf("Доход")}
@@ -138,7 +137,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
                     .clickable {
                         keyboardController?.hide()
                         focusRequesterManager.clearFocus()
-                        viewModel.addTransaction(date = "$date $time", amount = amount, description = description, type = if (type == "Доход") 0 else 1, category = categoryName!!, account_name = "Наличные", context = context)
+                        viewModel.addTransaction(date = "$date $time", amount = amount.toInt(), description = description, type = if (type == "Доход") 0 else 1, category = categoryName!!, account_name = accountName, context = context)
                         navController.popBackStack()
                     }
             )
@@ -235,8 +234,8 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
                 thickness = 1.dp
             )
             TextField(
-                value = amount.toString(),
-                onValueChange = { newAmount -> setAmount(newAmount.toIntOrNull() ?: 0) },
+                value = amount,
+                onValueChange = setAmount,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(
                     text = "Сумма",
