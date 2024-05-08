@@ -59,6 +59,7 @@ fun getCategoryIconsListExpenses(): List<CategoryIcon> {
         "Продукты" to R.drawable.ic_shopping_bag,
         "Коммунальные услуги" to R.drawable.ic_faucet,
         "Транспорт" to R.drawable.ic_taxi_bus,
+        "Связь" to R.drawable.ic_taxi_bus,
         "Здоровье" to R.drawable.ic_health,
         "Образование" to R.drawable.ic_education,
         "Одежда" to R.drawable.ic_clothes,

@@ -9,7 +9,7 @@ android {
 
     defaultConfig {
         applicationId = "com.kiselev.financialcompanion"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -78,6 +78,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
 
-
+    implementation("co.yml:ycharts:2.1.0")
     implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
 }

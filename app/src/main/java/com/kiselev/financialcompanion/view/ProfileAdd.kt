@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -43,11 +42,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.kiselev.financialcompanion.R
-import com.kiselev.financialcompanion.controller.OperationController
 import com.kiselev.financialcompanion.controller.ProfileController
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor
-import com.kiselev.financialcompanion.ui.theme.grayColor2
 import com.kiselev.financialcompanion.ui.theme.primaryColor
 
 @Composable
@@ -97,7 +94,10 @@ fun ProfileAdd(viewModel: ProfileController, navController: NavController) {
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .align(Alignment.CenterVertically)
-                    .clickable { viewModel.addAccount(name, balance, currency, context) }
+                    .clickable {
+                        viewModel.addAccount(name, balance, currency, context)
+                        navController.popBackStack()
+                    }
             )
 
         }

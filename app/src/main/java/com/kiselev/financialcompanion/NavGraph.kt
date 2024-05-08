@@ -52,7 +52,7 @@ fun BottomNavGraph(navController: NavController, mainController: NavHostControll
     ) {
         composable(route = "Operation") { OperationScreen(viewModel(), mainController) }
         composable(route = "Budget") { BudgetScreen(viewModel(), mainController) }
-        composable(route = "Graph") { GraphScreen() }
+        composable(route = "Graph") { GraphScreen(viewModel()) }
         composable(route = "Profile") { ProfileView(viewModel(), mainController) }
     }
 }
