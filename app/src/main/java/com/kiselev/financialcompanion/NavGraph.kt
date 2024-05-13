@@ -1,7 +1,5 @@
 package com.kiselev.financialcompanion
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -9,6 +7,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.kiselev.financialcompanion.view.AccountListScreen
 import com.kiselev.financialcompanion.view.BudgetAdd
 import com.kiselev.financialcompanion.view.BudgetScreen
 import com.kiselev.financialcompanion.view.GraphScreen
@@ -21,7 +20,6 @@ import com.kiselev.financialcompanion.view.RegistrationScreen
 import com.kiselev.financialcompanion.view.SelectionListScreen
 import com.kiselev.financialcompanion.view.WelcomeScreen
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MainNavGraph(startDestination: String) {
     val navController = rememberNavController()
@@ -36,14 +34,15 @@ fun MainNavGraph(startDestination: String) {
         composable(route = "MainScreen") { MainScreen(navController) }
 
         composable(route = "OperationAdd") { entry ->
-            OperationAdd(viewModel(), navController, entry.savedStateHandle.get<String>("category")) }
-        composable(route = "BudgetAdd") { BudgetAdd(viewModel(), navController) }
+            OperationAdd(viewModel(), navController, entry.savedStateHandle.get<String>("category"), entry.savedStateHandle.get<String>("account_name"), entry.savedStateHandle.get<String>("account_id")) }
+        composable(route = "BudgetAdd") { entry ->
+            BudgetAdd(viewModel(), navController, entry.savedStateHandle.get<String>("category")) }
         composable(route = "ProfileAdd") { ProfileAdd(viewModel(), navController)}
-        composable(route = "SelectionList") { SelectionListScreen(viewModel(), navController) }
+        composable(route = "SelectionList") { SelectionListScreen(navController) }
+        composable(route = "AccountList") { AccountListScreen(viewModel(), navController) }
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BottomNavGraph(navController: NavController, mainController: NavHostController) {
     NavHost(

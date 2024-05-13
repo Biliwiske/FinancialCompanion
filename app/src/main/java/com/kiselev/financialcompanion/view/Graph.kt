@@ -64,6 +64,8 @@ fun GraphScreen(viewModel: GraphController){
             .background(grayColor),
     ) {
         categories?.let { DonutCategoryChart(it) }
+        LineExpensesChart()
+        PieCategoryChart()
     }
 }
 

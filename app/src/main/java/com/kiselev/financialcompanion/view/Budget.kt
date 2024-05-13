@@ -1,8 +1,6 @@
 package com.kiselev.financialcompanion.view
 
 import android.content.Context
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,7 +54,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun BudgetScreen(viewModel: BudgetController, navController: NavController){
     val context = LocalContext.current
@@ -92,7 +89,6 @@ fun BudgetScreen(viewModel: BudgetController, navController: NavController){
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun BudgetItem(name: String, amount: String, type: Int, startDate: String, endDate: String, calculatedAmount: Int, rowCount: Int){
     val endDateTime = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
@@ -149,7 +145,7 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
             color = grayColor2
         )
         Column {
-            Row() {
+            Row {
                 Text(
                     modifier = Modifier
                         .weight(1f)
@@ -193,7 +189,6 @@ private fun getDayOfWeek(dayOfWeek: Int): String {
     return weekdays[(dayOfWeek % 7) + 1]
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun BudgetView(
     budgets: List<Budget>,
@@ -212,7 +207,6 @@ private fun BudgetView(
                 calculatedAmount.intValue = totalAmount
                 rowCount.intValue = rows
             }
-
             BudgetItem(
                 name = budget.name,
                 amount = budget.amount.toString(),
@@ -223,6 +217,7 @@ private fun BudgetView(
                 rowCount = rowCount.intValue
             )
         }
+        item { Spacer(modifier = Modifier.height(82.dp)) }
     }
 }
 
@@ -264,7 +259,6 @@ fun CustomProgressBar(progress: Int, amount: Int) {
 }
 
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun BudgetScreenPreview(){

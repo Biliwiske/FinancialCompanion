@@ -2,6 +2,7 @@ package com.kiselev.financialcompanion.view
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.kiselev.financialcompanion.R
 import com.kiselev.financialcompanion.controller.ProfileController
 import com.kiselev.financialcompanion.model.Account
 import com.kiselev.financialcompanion.model.getCategoryIcon
@@ -50,7 +52,6 @@ fun ProfileView(viewModel: ProfileController, navController: NavController) {
     var accounts by remember { mutableStateOf<List<Account>?>(null) }
     LaunchedEffect(key1 = Unit) {
         accounts = viewModel.getAccounts(context)
-        println("Счета: $accounts")
     }
 
     Scaffold(
@@ -62,8 +63,18 @@ fun ProfileView(viewModel: ProfileController, navController: NavController) {
                 .padding(it))
             {
                 Column(
-                    modifier = Modifier.padding(8.dp).fillMaxWidth()
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
                 ) {
+                    Text(
+                        text = "Счета",
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        color = Color.Black,
+                        fontFamily = InterFamily,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 20.sp,
+                    )
                     accounts?.let { RecyclerView(it) }
                     Text(
                         text = "Добавить счет",
@@ -75,6 +86,29 @@ fun ProfileView(viewModel: ProfileController, navController: NavController) {
                         fontFamily = InterFamily,
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    Button(
+                        onClick = {
+                            viewModel.logout(navController, context)
+                        },
+                        modifier = Modifier.padding(top = 12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = "Настройка уведомлений",
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = InterFamily)
+                    }
+                    Button(
+                        onClick = { viewModel.logout(navController, context) },
+                        colors = ButtonDefaults.buttonColors(containerColor = primaryColor),
+                        shape = RoundedCornerShape(4.dp)
+                    ){
+                        Text(
+                            text = "Настройка смс-уведомлений",
+                            fontWeight = FontWeight.Medium,
+                            fontFamily = InterFamily)
+                    }
                     Spacer(modifier = Modifier.weight(1f))
                     Button(
                         onClick = {
@@ -107,7 +141,7 @@ fun ListItem(accountName: String, accountBalance: Int, accountCurrency: String){
             .background(Color.White)
     ){
         Image(
-            painter = painterResource(id = categoryIcon),
+            painter = painterResource(id = R.drawable.ic_money),
             contentDescription = "Company logo",
             modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -136,7 +170,8 @@ fun ListItem(accountName: String, accountBalance: Int, accountCurrency: String){
 fun RecyclerView(accounts: List<Account>) {
     LazyColumn(
         modifier = Modifier
-            .background(grayColor2)
+            .background(Color.White)
+            .border(shape = RoundedCornerShape(6.dp), width = 1.dp, color = Color.Black)
     ) {
         items(items = accounts) { account ->
             ListItem(

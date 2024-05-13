@@ -1,8 +1,6 @@
 package com.kiselev.financialcompanion.view
 
 import android.annotation.SuppressLint
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -20,7 +18,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
@@ -35,9 +32,9 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -79,15 +76,16 @@ import java.time.format.DateTimeFormatter
 
 @SuppressLint("Range")
 @Composable
-fun OperationAdd(viewModel: OperationController, navController: NavController, category: String?) {
-    val (time, setTime) = remember { mutableStateOf(LocalTime.now()) }
-    val (date, setDate) = remember { mutableStateOf(LocalDate.now())}
+fun OperationAdd(viewModel: OperationController, navController: NavController, category: String?, account: String?, id: String?) {
+
+    val (time, setTime) = rememberSaveable { mutableStateOf(LocalTime.now()) }
+    val (date, setDate) = rememberSaveable { mutableStateOf(LocalDate.now())}
     val (categoryName, _) = remember { mutableStateOf(category) }
-    val (accountName, setAccountName) = remember { mutableStateOf("") }
-    val (amount, setAmount) = remember { mutableStateOf("") }
-    val (description, setDescription) = remember { mutableStateOf("") }
-    val regularState = remember { mutableStateOf(false)}
-    val (type, setType) = remember { mutableStateOf("Доход")}
+    val (accountName, _) = remember { mutableStateOf(account) }
+    val (amount, setAmount) = rememberSaveable { mutableStateOf("") }
+    val (description, setDescription) = rememberSaveable { mutableStateOf("") }
+    val regularState = rememberSaveable { mutableStateOf(false)}
+    val (type, setType) = rememberSaveable { mutableStateOf("Доход")}
 
     val dateDialogState = rememberMaterialDialogState()
     val timeDialogState = rememberMaterialDialogState()
@@ -108,7 +106,10 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
             horizontalArrangement = Arrangement.Start
         ) {
             IconButton(
-                onClick = { navController.popBackStack() }) {
+                onClick = {
+                    navController.popBackStack(
+                    )
+                }) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_back),
                     contentDescription = "Назад",
@@ -137,7 +138,16 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
                     .clickable {
                         keyboardController?.hide()
                         focusRequesterManager.clearFocus()
-                        viewModel.addTransaction(date = "$date $time", amount = amount.toInt(), description = description, type = if (type == "Доход") 0 else 1, category = categoryName!!, account_name = accountName, context = context)
+                        viewModel.addTransaction(
+                            date = "$date $time",
+                            amount = amount.toInt(),
+                            description = description,
+                            type = if (type == "Доход") 0 else 1,
+                            category = categoryName!!,
+                            account_name = accountName!!,
+                            account_id = id!!,
+                            context = context
+                        )
                         navController.popBackStack()
                     }
             )
@@ -291,7 +301,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .weight(1f)
-                        .clickable { navController.navigate(route = "SelectionList")}
+                        .clickable { navController.navigate(route = "SelectionList") }
                 ){
                     categoryName?.let{
                         Text(
@@ -324,29 +334,47 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
                 color = grayColor,
                 thickness = 1.dp
             )
-            TextField(
-                value = accountName,
-                onValueChange = setAccountName,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(
-                    text = "Счет",
-                    fontWeight = FontWeight.Light,
-                    fontFamily = InterFamily) },
-                leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = null)},
-                isError = false,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        keyboardController?.hide()
-                        focusRequesterManager.clearFocus() }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    cursorColor = Color.Black,
-                    errorBorderColor = Color.Red,
-                    errorLabelColor = Color.Red,
-                    errorLeadingIconColor = Color.Red,
-                    focusedBorderColor = primaryColor,
-                    unfocusedBorderColor = grayColor,
-                    focusedLabelColor = primaryColor))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp, top = 16.dp, bottom = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(imageVector = Icons.Filled.Edit, tint = grayColor4, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .weight(1f)
+                        .clickable { navController.navigate(route = "AccountList") }
+                ){
+                    accountName?.let{
+                        Text(
+                            text = "Счет",
+                            color = grayColor4,
+                            fontSize = 12.sp,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false,
+                                ),
+                            ),
+                            fontWeight = FontWeight.Light,
+                            fontFamily = InterFamily)
+                    }
+                    Text(
+                        text = accountName ?: "Счет",
+                        color = if(accountName != null) Color.Black else grayColor4,
+                        style = TextStyle(
+                            platformStyle = PlatformTextStyle(
+                                includeFontPadding = false,
+                            ),
+                        ),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Light,
+                        fontFamily = InterFamily
+                    )
+                }
+            }
             Row(
                 modifier = Modifier
                     .padding(top = 10.dp)
@@ -406,13 +434,14 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun Previews(){
     OperationAdd(
         viewModel = viewModel(),
         rememberNavController(),
-        "Транспорт"
+        "Транспорт",
+        "Наличные",
+        "10"
     )
 }

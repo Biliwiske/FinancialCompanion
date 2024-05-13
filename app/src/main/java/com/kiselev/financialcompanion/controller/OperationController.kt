@@ -49,11 +49,20 @@ class OperationController : ViewModel() {
         }
     }
 
-    fun addTransaction(date: String, amount: Int, description: String, type: Int, category: String, account_name: String, context: Context){
+    fun addTransaction(date: String, amount: Int, description: String, type: Int, category: String, account_name: String, account_id: String, context: Context){
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val userId = readUserId(context)
-                val response = transactionApi.addTransaction(mapOf("transaction" to Transaction(id_transaction = -1, date = date, amount = amount, description = description, type = type, category = category, user_id = userId!!, id_account = "3")))
+                val response = transactionApi.addTransaction(mapOf("transaction" to Transaction(
+                    id_transaction = -1,
+                    date = date,
+                    amount = amount,
+                    description = description,
+                    type = type,
+                    category = category,
+                    user_id = userId!!,
+                    account_name = account_name,
+                    id_account = account_id)))
                 println("response = $response")
                 withContext(Dispatchers.Main) {
                     //handleLoginResponse(response, navController, context)
