@@ -179,6 +179,7 @@ private fun BudgetItem(name: String, amount: String, type: Int, startDate: Strin
                     fontFamily = InterFamily
                 )
             }
+            println("Процентыч: $calculatedAmount")
             CustomProgressBar(progress = calculatedAmount, amount = amount.toInt())
         }
     }

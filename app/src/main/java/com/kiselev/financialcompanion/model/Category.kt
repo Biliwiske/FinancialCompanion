@@ -10,15 +10,16 @@ fun getCategoryIcon(categoryName: String): Int {
         "Продукты" to R.drawable.ic_shopping_bag,
         "Коммунальные услуги" to R.drawable.ic_faucet,
         "Транспорт" to R.drawable.ic_taxi_bus,
+        "Связь" to R.drawable.ic_phone  ,
+        "Техника" to R.drawable.ic_computer,
         "Здоровье" to R.drawable.ic_health,
         "Образование" to R.drawable.ic_education,
         "Одежда" to R.drawable.ic_clothes,
         "Развлечения" to R.drawable.ic_games,
         "Спорт" to R.drawable.ic_sport,
-        "Транспорт" to R.drawable.ic_taxi_bus,
         "Благотворительность" to R.drawable.ic_charity,
 
-        "Прочее" to R.drawable.ic_taxi_bus,
+        "Прочее" to R.drawable.ic_option,
 
         "Зарплата" to R.drawable.ic_money,
         "Инвестиции" to R.drawable.ic_taxi_bus,
@@ -59,14 +60,16 @@ fun getCategoryIconsListExpenses(): List<CategoryIcon> {
         "Продукты" to R.drawable.ic_shopping_bag,
         "Коммунальные услуги" to R.drawable.ic_faucet,
         "Транспорт" to R.drawable.ic_taxi_bus,
-        "Связь" to R.drawable.ic_taxi_bus,
+        "Подарок" to R.drawable.ic_games,
+        "Связь" to R.drawable.ic_phone,
+        "Техника" to R.drawable.ic_computer,
         "Здоровье" to R.drawable.ic_health,
         "Образование" to R.drawable.ic_education,
         "Одежда" to R.drawable.ic_clothes,
         "Развлечения" to R.drawable.ic_games,
         "Спорт" to R.drawable.ic_sport,
         "Благотворительность" to R.drawable.ic_charity,
-        "Прочее" to R.drawable.ic_taxi_bus,
+        "Прочее" to R.drawable.ic_option,
     )
     val categories = mutableListOf<CategoryIcon>()
 

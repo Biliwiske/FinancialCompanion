@@ -3,9 +3,13 @@ package com.kiselev.financialcompanion.controller
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.google.gson.GsonBuilder
+import com.kiselev.financialcompanion.model.Account
+import com.kiselev.financialcompanion.model.AccountApi
 import com.kiselev.financialcompanion.model.Budget
 import com.kiselev.financialcompanion.model.BudgetApi
 import com.kiselev.financialcompanion.model.GraphApi
+import com.kiselev.financialcompanion.model.Transaction
+import com.kiselev.financialcompanion.model.TransactionApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
@@ -23,6 +27,8 @@ class GraphController : ViewModel() {
         .addConverterFactory(ScalarsConverterFactory.create())
         .addConverterFactory(GsonConverterFactory.create(gson)).build()
     private val graphApi = retrofit.create(GraphApi::class.java)
+    private val accountApi = retrofit.create(AccountApi::class.java)
+    private val transactionApi = retrofit.create(TransactionApi::class.java)
 
     suspend fun getCategoryCalculated(context: Context): Map<String, Pair<Int, Int>> {
         return try {
@@ -56,6 +62,47 @@ class GraphController : ViewModel() {
         }
     }
 
+    suspend fun getAccounts(context: Context) : List<Account>? {
+        return try {
+            val userId = readUserId(context)
+            if (userId != null) {
+                val response = accountApi.getAccounts(userId)
+                if (response.isSuccessful) {
+                    response.body()?.accounts
+                } else {
+                    handleResponseError(response.message())
+                    null
+                }
+            } else {
+                handleUserIdIsNullError()
+                null
+            }
+        } catch (e: Exception) {
+            handleError(e)
+            null
+        }
+    }
+
+    suspend fun getTransactions(context: Context) : List<Transaction>? {
+        return try {
+            val userId = readUserId(context)
+            if (userId != null) {
+                val response = transactionApi.getTransactions(userId)
+                if (response.isSuccessful) {
+                    response.body()?.transactions
+                } else {
+                    handleResponseError(response.message())
+                    null
+                }
+            } else {
+                handleUserIdIsNullError()
+                null
+            }
+        } catch (e: Exception) {
+            handleError(e)
+            null
+        }
+    }
 
     private fun handleResponseError(message: String?) {
         println("Server error: $message")

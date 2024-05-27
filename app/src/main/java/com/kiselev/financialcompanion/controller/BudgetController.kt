@@ -73,6 +73,7 @@ class BudgetController : ViewModel() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val userId = readUserId(context)
+                println("Конец бюджета = $end_date")
                 val response = budgetApi.addBudget(mapOf("budget" to Budget(id = -1, name = name, amount = amount, type = type, start_date = start_date, end_date = end_date, id_user = userId!!)))
                 println("response = $response")
                 withContext(Dispatchers.Main) {
