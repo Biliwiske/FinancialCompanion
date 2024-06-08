@@ -85,7 +85,6 @@ fun BudgetAdd(viewModel: BudgetController, navController: NavController, categor
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(grayColor2)
     ) {
         Row(
             modifier = Modifier

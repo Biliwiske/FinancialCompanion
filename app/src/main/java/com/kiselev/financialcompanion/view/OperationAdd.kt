@@ -97,7 +97,6 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(grayColor2)
     ) {
         Row(
             modifier = Modifier
@@ -107,8 +106,7 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
         ) {
             IconButton(
                 onClick = {
-                    navController.popBackStack(
-                    )
+                    navController.popBackStack()
                 }) {
                 Icon(
                     painter = painterResource(R.drawable.arrow_back),
@@ -375,6 +373,10 @@ fun OperationAdd(viewModel: OperationController, navController: NavController, c
                     )
                 }
             }
+            HorizontalDivider(
+                color = grayColor,
+                thickness = 1.dp
+            )
             Row(
                 modifier = Modifier
                     .padding(top = 10.dp)

@@ -1,9 +1,9 @@
 package com.kiselev.financialcompanion.view
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,21 +12,36 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import co.yml.charts.axis.AxisData
 import co.yml.charts.common.components.Legends
 import co.yml.charts.common.model.LegendLabel
@@ -47,49 +62,270 @@ import co.yml.charts.ui.piechart.charts.DonutPieChart
 import co.yml.charts.ui.piechart.charts.PieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
+import com.kiselev.financialcompanion.R
 import com.kiselev.financialcompanion.controller.GraphController
 import com.kiselev.financialcompanion.model.Account
 import com.kiselev.financialcompanion.model.Transaction
 import com.kiselev.financialcompanion.ui.theme.InterFamily
 import com.kiselev.financialcompanion.ui.theme.grayColor
 import com.kiselev.financialcompanion.ui.theme.primaryColor
+import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import kotlin.math.roundToInt
 
 @Composable
-fun GraphScreen(viewModel: GraphController){
+fun GraphScreen(viewModel: GraphController) {
     val context = LocalContext.current
     var categories by remember { mutableStateOf<Map<String, Pair<Int, Int>>?>(null) }
-    LaunchedEffect(key1 = Unit) {
-        categories = viewModel.getCategoryCalculated(context)
-    }
-
-    var accounts by remember { mutableStateOf<List<Account>?>(null) }
-    LaunchedEffect(key1 = Unit) {
-        accounts = viewModel.getAccounts(context)
-    }
-
     var transactions by remember { mutableStateOf<List<Transaction>?>(null) }
-    LaunchedEffect(key1 = Unit) {
+    var accounts by remember { mutableStateOf<List<Account>?>(null) }
+
+    val (selectedPeriod, setSelectedPeriod) = remember { mutableStateOf("MONTH") }
+    val (date, setDate) = rememberSaveable { mutableStateOf(LocalDate.now()) }
+
+    val locale = Locale("ru")
+    val monthFormatter = DateTimeFormatter.ofPattern("LLLL yyyy", locale)
+
+    fun adjustDate(amount: Long) {
+        setDate(when (selectedPeriod) {
+            "WEEK" -> date.plusWeeks(amount)
+            "MONTH" -> date.plusMonths(amount)
+            "YEAR" -> date.plusYears(amount)
+            else -> date
+        })
+    }
+
+    LaunchedEffect(Unit) {
+        categories = viewModel.getCategoryCalculated(context)
+        accounts = viewModel.getAccounts(context)
         transactions = viewModel.getTransactions(context)
     }
 
+    val filteredTransactions = transactions?.let { filterTransactions(it, date, selectedPeriod) }
+    val filteredCategories = categories?.let { filterCategories(categories!!, transactions, date, selectedPeriod) }
+
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .background(grayColor),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        transactions?.let { accounts?.let { it1 -> Analyse(it, it1) } }
-        transactions?.let { LineExpensesChart(it) }
-        categories?.let { DonutCategoryChart(it) }
-        accounts?.let { PieCategoryChart(it) }
+        Row(modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+        ) {
+            IconButton(
+                onClick = { adjustDate(-1) }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_back),
+                    contentDescription = "Назад",
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
+                text = when (selectedPeriod) {
+                    "WEEK" -> "${date.with(DayOfWeek.MONDAY).format(DateTimeFormatter.ofPattern("dd.MM.yyyy", locale))} - ${date.with(DayOfWeek.SUNDAY).format(DateTimeFormatter.ofPattern("dd.MM.yyyy", locale))}"
+                    "MONTH" -> date.format(monthFormatter)
+                    "YEAR" -> date.year.toString()
+                    else -> date.toString()
+                },
+                textAlign = TextAlign.Center,
+                fontFamily = InterFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 15.sp
+            )
+            IconButton(
+                onClick = { adjustDate(1) }
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.arrow_right),
+                    contentDescription = "Вперед",
+                    modifier = Modifier.align(Alignment.CenterVertically)
+                )
+            }
+        }
+        HorizontalDivider()
+        Row(modifier = Modifier.fillMaxWidth()
+        ) {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedPeriod == "WEEK") primaryColor else Color.White,
+                    contentColor = if (selectedPeriod == "WEEK") Color.White else Color.Black
+                ),
+                onClick = {
+                    setSelectedPeriod("WEEK")
+                    setDate(LocalDate.now().with(DayOfWeek.MONDAY)) // Обновить дату при выборе недели
+                }
+            ) {
+                Text(
+                    text = "Неделя",
+                    fontFamily = InterFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp
+                )
+            }
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedPeriod == "MONTH") primaryColor else Color.White,
+                    contentColor = if (selectedPeriod == "MONTH") Color.White else Color.Black
+                ),
+                onClick = {
+                    setSelectedPeriod("MONTH")
+                    setDate(LocalDate.now().withDayOfMonth(1)) // Обновить дату при выборе месяца
+                }
+            ) {
+                Text(
+                    text = "Месяц",
+                    fontFamily = InterFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp
+                )
+            }
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(48.dp),
+                shape = RectangleShape,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (selectedPeriod == "YEAR") primaryColor else Color.White,
+                    contentColor = if (selectedPeriod == "YEAR") Color.White else Color.Black
+                ),
+                onClick = {
+                    setSelectedPeriod("YEAR")
+                    setDate(LocalDate.now().withDayOfYear(1)) // Обновить дату при выборе года
+                }
+            ) {
+                Text(
+                    text = "Год",
+                    fontFamily = InterFamily,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp
+                )
+            }
+        }
+        HorizontalDivider()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .background(grayColor),
+        ) {
+            if (!filteredTransactions.isNullOrEmpty() || !filteredCategories.isNullOrEmpty()) {
+                Analyse(filteredTransactions, accounts)
+                if (filteredCategories != null) {
+                    DonutCategoryChart(filteredCategories)
+                }
+                if (filteredTransactions != null) {
+                    LineExpensesChart(filteredTransactions)
+                }
+                accounts?.let { PieCategoryChart(it) }
+                if (filteredTransactions != null) {
+                    accounts?.let { Advices(transactions = filteredTransactions, accounts = it) }
+                }
+            } else {
+                EmptyDataPlaceholder()
+            }
+        }
     }
 }
 
 @Composable
-fun Analyse(transactions: List<Transaction>, accounts: List<Account>) {
-    val totalIncome = transactions.filter { it.type == 0 }.sumOf { it.amount }
-    val totalExpense = transactions.filter { it.type == 1 }.sumOf { it.amount }
-    val totalSavings = accounts.sumOf { it.balance }
+fun EmptyDataPlaceholder() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Info,
+            contentDescription = "Нет данных",
+            modifier = Modifier.size(64.dp),
+            tint = Color.Gray
+        )
+        Text(
+            text = "Данные за выбранный период отсутствуют",
+            color = Color.Gray,
+            fontFamily = InterFamily,
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 16.dp)
+        )
+    }
+}
+
+fun filterTransactions(transactions: List<Transaction>, date: LocalDate, period: String): List<Transaction> {
+    return when (period) {
+        "WEEK" -> {
+            val startOfWeek = date.with(DayOfWeek.MONDAY)
+            val endOfWeek = date.with(DayOfWeek.SUNDAY)
+            transactions.filter { it.date >= startOfWeek.toString() && it.date <= endOfWeek.toString() }
+        }
+        "MONTH" -> {
+            val startOfMonth = date.withDayOfMonth(1)
+            val endOfMonth = date.withDayOfMonth(date.lengthOfMonth())
+            transactions.filter { it.date >= startOfMonth.toString() && it.date <= endOfMonth.toString() }
+        }
+        "YEAR" -> {
+            val startOfYear = date.withDayOfYear(1)
+            val endOfYear = date.withDayOfYear(date.lengthOfYear())
+            transactions.filter { it.date >= startOfYear.toString() && it.date <= endOfYear.toString() }
+        }
+        else -> transactions
+    }
+}
+
+fun filterCategories(
+    categories: Map<String, Pair<Int, Int>>,
+    transactions: List<Transaction>?,
+    date: LocalDate,
+    period: String
+): Map<String, Pair<Int, Int>> {
+    if (transactions == null) return emptyMap()
+
+    val filteredTransactions = filterTransactions(transactions, date, period)
+    val filteredCategories = mutableMapOf<String, Pair<Int, Int>>()
+
+    for (transaction in filteredTransactions) {
+        val category = transaction.category
+        if (category in categories) {
+            val (totalAmount, rowCount) = categories[category]!!
+            filteredCategories[category] = Pair(
+                filteredCategories.getOrDefault(category, Pair(0, 0)).first + transaction.amount,
+                filteredCategories.getOrDefault(category, Pair(0, 0)).second + 1
+            )
+        }
+    }
+
+    return filteredCategories
+}
+
+
+@Composable
+fun Analyse(transactions: List<Transaction>?, accounts: List<Account>?) {
+    val totalIncome = remember(transactions) {
+        transactions?.filter { it.type == 0 }?.sumOf { it.amount } ?: 0
+    }
+    val totalExpense = remember(transactions) {
+        transactions?.filter { it.type == 1 }?.sumOf { it.amount } ?: 0
+    }
+    val totalSavings = remember(accounts) {
+        accounts?.sumOf { it.balance } ?: 0
+    }
 
     Column(
         modifier = Modifier
@@ -105,37 +341,186 @@ fun Analyse(transactions: List<Transaction>, accounts: List<Account>) {
             fontWeight = FontWeight.Medium,
             fontSize = 20.sp,
         )
-
-        Text(
-            text = "Общий доход: $totalIncome",
-            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-            color = Color.Black,
-            fontFamily = InterFamily,
-            fontSize = 16.sp,
-        )
-
-        Text(
-            text = "Общие расходы: $totalExpense",
-            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-            color = Color.Black,
-            fontFamily = InterFamily,
-            fontSize = 16.sp,
-        )
-
-        Text(
-            text = "Сбережения: $totalSavings",
-            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-            color = Color.Black,
-            fontFamily = InterFamily,
-            fontSize = 16.sp,
-        )
-
-
+        InfoText("Общий доход: $totalIncome")
+        InfoText("Общие расходы: $totalExpense")
+        InfoText("Сбережения: $totalSavings")
     }
 }
 
 @Composable
-fun DonutCategoryChart(data: Map<String, Pair<Int, Int>?>) {
+fun InfoText(text: String) {
+    Text(
+        text = text,
+        modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+        color = Color.Black,
+        fontFamily = InterFamily,
+        fontSize = 16.sp,
+    )
+}
+
+@Composable
+fun Advices(transactions: List<Transaction>, accounts: List<Account>) {
+    val categorySums = transactions
+        .filter { it.type == 1 }
+        .groupBy { it.category }
+        .mapValues { entry -> entry.value.sumOf { it.amount } }
+
+    val totalExpenses = categorySums.values.sum()
+    val mostSpentCategory = categorySums.maxByOrNull { it.value }?.key ?: ""
+    val mostSpentAmount = categorySums[mostSpentCategory] ?: 0
+    val percentage = if (totalExpenses > 0) (mostSpentAmount * 100) / totalExpenses else 0
+    val regularExpenses = findRegularExpenses(transactions)
+    val averageMonthlyIncome = calculateAverageMonthlyIncome(transactions)
+    val dailySpendingLimit = (averageMonthlyIncome / 30).roundToInt()
+
+    Column(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        Text(
+            text = "Личные советы",
+            modifier = Modifier.padding(start = 8.dp, bottom = 16.dp),
+            color = Color.Black,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium
+        )
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+        ){
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Нет данных",
+                modifier = Modifier
+                    .size(36.dp)
+                    .align(Alignment.CenterVertically),
+                tint = Color(0xFFD10028)
+            )
+            Column {
+                Text(
+                    text = "Вы тратите больше чем зарабатывайте, через X месяцев у вас кончатся деньги.",
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "$percentage% ваших транзакций сосредоточены в категории '$mostSpentCategory', попробуйте по возможности пересмотреть ваши расходы в этой категории.",
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+            thickness = 1.dp)
+        Row{
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Нет данных",
+                modifier = Modifier
+                    .size(36.dp)
+                    .align(Alignment.CenterVertically),
+                tint = Color(0xFFFFBB42)
+            )
+            Column{
+                Text(
+                    text = "Вы откладывайте <10% средств. Такими темпами вы ни на что не накопите.",
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "У вас отстутствуют бюджеты. Назначьте парочку.",
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+            }
+        }
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+            thickness = 1.dp)
+        Row {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = "Нет данных",
+                modifier = Modifier
+                    .size(36.dp)
+                    .align(Alignment.CenterVertically),
+                tint = Color.Gray
+            )
+            Column {
+                regularExpenses.forEach { (description, totalAmount) ->
+                    Text(
+                        text = "Регулярный расход: $description, сумма: $totalAmount руб.",
+                        modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                        color = Color.Black,
+                        fontSize = 16.sp
+                    )
+                }
+
+                Text(
+                    text = "Ваша средняя месячная зарплата: %.2f руб. Вы можете тратить %d руб. в день.".format(averageMonthlyIncome, dailySpendingLimit),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
+}
+
+fun calculateAverageMonthlyIncome(transactions: List<Transaction>): Double {
+    val incomes = transactions.filter { it.type == 0 }
+
+    if (incomes.isEmpty()) return 0.0
+
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+    val monthsIncomes = incomes.groupBy { dateFormat.parse(it.date).toYearMonth() }
+    val averageMonthlyIncome = monthsIncomes.values.map { month ->
+        month.sumBy { it.amount }
+    }.average()
+
+    return averageMonthlyIncome
+}
+
+fun Date.toYearMonth(): String {
+    val calendar = Calendar.getInstance()
+    calendar.time = this
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH) + 1
+    return "$year-$month"
+}
+
+fun findRegularExpenses(transactions: List<Transaction>): List<Pair<String, Int>> {
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+
+    val expenses = transactions.filter { it.type == 1 }
+    val groupedByDescription = expenses.groupBy { it.description }
+
+    return groupedByDescription.mapNotNull { (description, transList) ->
+        val dates = transList.map { dateFormat.parse(it.date) }.sorted()
+        if (dates.size < 2) return@mapNotNull null
+
+        val intervals = dates.zipWithNext { a, b -> (b.time - a.time) / (1000 * 60 * 60 * 24) } // Разница в днях
+        val averageInterval = intervals.average()
+
+        if (averageInterval <= 30) {
+            val totalAmount = transList.sumBy { it.amount }
+            "$description (${transList.first().category})" to totalAmount
+        } else {
+            null
+        }
+    }
+}
+
+@Composable
+fun DonutCategoryChart(data: Map<String, Pair<Int, Int>>) {
     val colors = listOf(
         Color(0xFF3B82F6),
         Color(0xFFFD6481),
@@ -355,7 +740,7 @@ fun PieCategoryChart(data: List<Account>){
         modifier = Modifier
             .background(Color.White)
             .fillMaxWidth()
-            .height(300.dp)
+            .height(250.dp)
             .padding(8.dp)
     ) {
         Text(
@@ -385,4 +770,16 @@ fun PieCategoryChart(data: List<Account>){
 
 @Composable
 fun WaveIncomeExcomeChart(){
+}
+
+@Preview
+@Composable
+fun GraphPreview(){
+    GraphScreen(viewModel = viewModel())
+}
+
+@Preview
+@Composable
+fun AdvicesPreview(){
+    Advices(transactions = emptyList(), accounts = emptyList())
 }
