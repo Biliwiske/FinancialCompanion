@@ -1,9 +1,7 @@
 package com.kiselev.financialcompanion.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -31,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
@@ -401,7 +397,7 @@ fun Advices(transactions: List<Transaction>, accounts: List<Account>) {
             )
             Column {
                 Text(
-                    text = "Вы тратите больше чем зарабатывайте, через X месяцев у вас кончатся деньги.",
+                    text = "Вы тратите больше чем зарабатывайте, приблизительно через 4 месяца у вас кончатся деньги.",
                     modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
                     color = Color.Black,
                     fontSize = 16.sp
@@ -429,13 +425,19 @@ fun Advices(transactions: List<Transaction>, accounts: List<Account>) {
             )
             Column{
                 Text(
-                    text = "Вы откладывайте <10% средств. Такими темпами вы ни на что не накопите.",
+                    text = "Вы откладывайте <10% средств. Начните откладывать деньги чтобы начать копить их.",
                     modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
                     color = Color.Black,
                     fontSize = 16.sp
                 )
                 Text(
-                    text = "У вас отстутствуют бюджеты. Назначьте парочку.",
+                    text = "На вашем наличном счету 3901 рубль, вы можете положить их на накопительных счет чтобы получать с них прибыль",
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "У вас отстутствует бюджет в самой дорогой категории 'Развлечения'. Создайте бюджет и начните контролировать данную категорию.",
                     modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
                     color = Color.Black,
                     fontSize = 16.sp
@@ -455,6 +457,18 @@ fun Advices(transactions: List<Transaction>, accounts: List<Account>) {
                 tint = Color.Gray
             )
             Column {
+                Text(
+                    text = "Ваша средняя месячная зарплата: %.2f руб. Вы можете тратить %d руб. в день.".format(averageMonthlyIncome, dailySpendingLimit),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
+                Text(
+                    text = "Список выделенных регулярных расходов:",
+                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
+                    color = Color.Black,
+                    fontSize = 16.sp
+                )
                 regularExpenses.forEach { (description, totalAmount) ->
                     Text(
                         text = "Регулярный расход: $description, сумма: $totalAmount руб.",
@@ -463,13 +477,6 @@ fun Advices(transactions: List<Transaction>, accounts: List<Account>) {
                         fontSize = 16.sp
                     )
                 }
-
-                Text(
-                    text = "Ваша средняя месячная зарплата: %.2f руб. Вы можете тратить %d руб. в день.".format(averageMonthlyIncome, dailySpendingLimit),
-                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp),
-                    color = Color.Black,
-                    fontSize = 16.sp
-                )
             }
         }
     }
